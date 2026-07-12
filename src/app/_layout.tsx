@@ -52,7 +52,6 @@ export default function RootLayout() {
       <Stack.Screen name="choose-icon" options={{ presentation: 'modal' }} />
       <Stack.Screen name="scan" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="login" options={{ presentation: 'fullScreenModal' }} />
-      <Stack.Screen name="verify" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
     </Stack>
   );

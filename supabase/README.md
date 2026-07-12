@@ -1,10 +1,14 @@
 # FreshKeep Supabase setup
 
-This app uses Supabase for Premium cloud sync and sign-in (phone OTP + Google),
-plus a Supabase Edge Function that receives LemonSqueezy billing webhooks. The
-code is complete, but a few things can only be done from your own Supabase /
-LemonSqueezy accounts — an AI agent can't create accounts or configure
-third-party SMS/OAuth/payment providers on your behalf. Do these once:
+This app uses Supabase for Premium cloud sync and Google sign-in, plus a
+Supabase Edge Function that receives LemonSqueezy billing webhooks. (Phone/SMS
+OTP was deliberately left out — Supabase doesn't provide free SMS sending the
+way Firebase does; it just relays through a third-party provider like Twilio
+that you pay per message, plus India requires DLT registration for production
+SMS. Google sign-in has no such cost.) The code is complete, but a few things
+can only be done from your own Supabase / LemonSqueezy / Google accounts — an
+AI agent can't create accounts or configure third-party OAuth/payment
+providers on your behalf. Do these once:
 
 ## 1. Create a project
 
@@ -34,15 +38,7 @@ Open the SQL Editor in your Supabase project dashboard and run, in order:
 2. `supabase/migrations/0002_billing.sql` — adds LemonSqueezy subscription
    columns to `profiles`.
 
-## 4. Enable phone (OTP) sign-in
-
-Authentication → Providers → Phone → enable it, and connect an SMS provider
-(Twilio, MessageBird, or Vonage — Supabase needs your credentials for one of
-these; the free tier of any of them is enough for testing). Without this
-step, `sendPhoneOtp` in the app will fail with a clear Supabase error rather
-than silently doing nothing.
-
-## 5. Enable Google sign-in
+## 4. Enable Google sign-in
 
 Authentication → Providers → Google → enable it, and add an OAuth Client ID
 and secret from the Google Cloud Console. Under Authentication → URL
@@ -51,7 +47,7 @@ a dev client / standalone build with `scheme: "freshkeep"` in `app.json`,
 that's `freshkeep://`; for Expo Go during development it's the
 `exp://<host>` URL Expo prints when you start the dev server — add both).
 
-## 6. Set up LemonSqueezy billing
+## 5. Set up LemonSqueezy billing
 
 **⚠️ Before you launch this on the iOS App Store:** Apple's guidelines
 generally require native In-App Purchase for unlocking features/content

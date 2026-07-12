@@ -35,9 +35,7 @@ export default function Settings() {
     await setAppLockEnabled(value);
   };
 
-  const accountLabel = user?.phone ? `+${user.phone}` : user?.email ?? null;
-  // A phone number has no meaningful "initial" letter — show a generic
-  // avatar glyph for phone accounts, and the first letter for email ones.
+  const accountLabel = user?.email ?? null;
   const avatarGlyph = user?.email ? user.email[0].toUpperCase() : '👤';
 
   const onSyncNow = async () => {

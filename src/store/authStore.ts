@@ -16,8 +16,6 @@ type AuthState = {
   user: User | null;
   isPremium: boolean;
   init: () => Promise<void>;
-  sendPhoneOtp: (phone: string) => Promise<AuthResult>;
-  verifyPhoneOtp: (phone: string, token: string) => Promise<AuthResult>;
   signInWithGoogle: () => Promise<AuthResult>;
   signOut: () => Promise<void>;
   refreshPremiumStatus: () => Promise<void>;
@@ -76,18 +74,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ isPremium: false });
       }
     });
-  },
-
-  sendPhoneOtp: async (phone) => {
-    if (!isSupabaseConfigured) return { error: 'Supabase is not configured — see supabase/README.md' };
-    const { error } = await supabase.auth.signInWithOtp({ phone });
-    return error ? { error: error.message } : {};
-  },
-
-  verifyPhoneOtp: async (phone, token) => {
-    if (!isSupabaseConfigured) return { error: 'Supabase is not configured — see supabase/README.md' };
-    const { error } = await supabase.auth.verifyOtp({ phone, token, type: 'sms' });
-    return error ? { error: error.message } : {};
   },
 
   signInWithGoogle: async () => {
