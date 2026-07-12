@@ -20,6 +20,7 @@ type AuthState = {
   signInWithGoogle: () => Promise<AuthResult>;
   signOut: () => Promise<void>;
   refreshPremiumStatus: () => Promise<void>;
+  subscribeToPremiumChanges: () => () => void;
 };
 
 async function fetchIsPremium(userId: string): Promise<boolean> {
@@ -98,5 +99,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const user = get().user;
     if (!user) return;
     set({ isPremium: await fetchIsPremium(user.id) });
+  },
+
+  /**
+   * Live-updates `isPremium` the moment the LemonSqueezy webhook writes to
+   * this user's profile row (see supabase/functions/lemonsqueezy-webhook),
+   * so the paywall flips to "You're already on Premium" without the user
+   * needing to background/foreground the app. Returns an unsubscribe
+   * function; no-op (returns a no-op unsubscribe) if not signed in.
+   */
+  subscribeToPremiumChanges: () => {
+    const user = get().user;
+    if (!user) return () => {};
+    const channel = supabase
+      .channel(`profile-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `user_id=eq.${user.id}` },
+        (payload) => set({ isPremium: Boolean((payload.new as { is_premium?: boolean }).is_premium) }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   },
 }));

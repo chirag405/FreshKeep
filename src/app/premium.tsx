@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { colors } from '@/theme/tokens';
 import { useAuthStore } from '@/store/authStore';
+import { buildCheckoutUrl, isLemonSqueezyConfigured, type BillingPlan } from '@/lib/lemonsqueezy';
 
 const BENEFITS = [
   'Sync across iPhone, iPad & web',
@@ -12,7 +15,36 @@ const BENEFITS = [
 
 export default function Premium() {
   const router = useRouter();
-  const isPremium = useAuthStore((s) => s.isPremium);
+  const { isPremium, user, refreshPremiumStatus, subscribeToPremiumChanges } = useAuthStore();
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('yearly');
+  const [checkingOut, setCheckingOut] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToPremiumChanges();
+    return unsubscribe;
+  }, [subscribeToPremiumChanges]);
+
+  const onUpgrade = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    const checkoutUrl = buildCheckoutUrl(selectedPlan, user.id, user.email);
+    if (!checkoutUrl) {
+      Alert.alert(
+        'Billing not configured yet',
+        "LemonSqueezy store/variant IDs aren't set — see supabase/README.md. For now, cloud sync can be enabled for testing directly in the Supabase dashboard.",
+      );
+      return;
+    }
+    setCheckingOut(true);
+    await WebBrowser.openBrowserAsync(checkoutUrl);
+    // The webhook updates profiles server-side; the realtime subscription above
+    // will pick it up automatically, but refresh once too in case it landed
+    // just before the subscription connected.
+    await refreshPremiumStatus();
+    setCheckingOut(false);
+  };
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -38,28 +70,29 @@ export default function Premium() {
       ) : (
         <>
           <View style={styles.plansRow}>
-            <View style={styles.planCard}>
+            <Pressable
+              style={[styles.planCard, selectedPlan === 'monthly' && styles.planCardHighlight]}
+              onPress={() => setSelectedPlan('monthly')}
+            >
               <Text style={styles.planLabel}>Monthly</Text>
               <Text style={styles.planPrice}>$1.99</Text>
               <Text style={styles.planSub}>per month</Text>
-            </View>
-            <View style={[styles.planCard, styles.planCardHighlight]}>
+            </Pressable>
+            <Pressable
+              style={[styles.planCard, selectedPlan === 'yearly' && styles.planCardHighlight]}
+              onPress={() => setSelectedPlan('yearly')}
+            >
               <Text style={styles.planLabel}>Yearly</Text>
               <Text style={styles.planPrice}>$14.99</Text>
               <Text style={styles.planSub}>$1.25 / month</Text>
-            </View>
+            </Pressable>
           </View>
-          <Pressable
-            style={styles.cta}
-            onPress={() =>
-              Alert.alert(
-                'Billing coming soon',
-                'In-app purchases need App Store/Play Console accounts that aren’t set up yet. For now, cloud sync can be enabled for testing directly in the Supabase dashboard — see supabase/README.md.',
-              )
-            }
-          >
-            <Text style={styles.ctaText}>Start 7-day free trial</Text>
+          <Pressable style={styles.cta} onPress={onUpgrade} disabled={checkingOut}>
+            <Text style={styles.ctaText}>{checkingOut ? 'Opening checkout…' : 'Continue to checkout'}</Text>
           </Pressable>
+          {!isLemonSqueezyConfigured && (
+            <Text style={styles.configNote}>Billing isn&apos;t configured yet — see supabase/README.md.</Text>
+          )}
         </>
       )}
       <Text style={styles.footnote}>The free plan keeps everything on-device forever.</Text>
@@ -85,5 +118,6 @@ const styles = StyleSheet.create({
   planSub: { color: 'rgba(255,255,255,0.5)', fontSize: 12 },
   cta: { backgroundColor: colors.primary, borderRadius: 15, paddingVertical: 16, alignItems: 'center', marginTop: 14 },
   ctaText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  configNote: { color: 'rgba(255,255,255,0.5)', fontSize: 12, textAlign: 'center', marginTop: 10 },
   footnote: { color: 'rgba(255,255,255,0.4)', fontSize: 12, textAlign: 'center', marginTop: 14 },
 });
