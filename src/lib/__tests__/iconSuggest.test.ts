@@ -17,4 +17,13 @@ describe('suggestIcon', () => {
     expect(suggestIcon('Xyzzy', 'expiry')).toBe('🥫');
     expect(suggestIcon('Xyzzy', 'lastTime')).toBe('📝');
   });
+  it('distinguishes salad from other greens', () => {
+    expect(suggestIcon('Caesar salad', 'expiry')).toBe('🥗');
+    expect(suggestIcon('Spinach', 'expiry')).toBe('🥬');
+  });
+  it('matches newly added home & chores keywords', () => {
+    expect(suggestIcon('Car oil change', 'lastTime')).toBe('🚗');
+    expect(suggestIcon('Spare keys', 'lastTime')).toBe('🔑');
+    expect(suggestIcon('Vacuum the carpet', 'lastTime')).toBe('🧹');
+  });
 });

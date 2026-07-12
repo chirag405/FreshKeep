@@ -7,6 +7,8 @@ import { ICON_CATEGORIES } from '@/lib/iconCatalog';
 import { IconTile } from '@/components/IconTile';
 import { emitIconSelected } from '@/lib/iconSelectionChannel';
 
+const ALL_ICONS = ICON_CATEGORIES.flatMap((cat) => cat.icons);
+
 export default function ChooseIcon() {
   const router = useRouter();
   const { selected } = useLocalSearchParams<{ selected?: string }>();
@@ -18,6 +20,10 @@ export default function ChooseIcon() {
     emitIconSelected(icon);
     router.back();
   };
+
+  const currentLabel = ALL_ICONS.find((entry) => entry.icon === current)?.label ?? 'Custom icon';
+  const trimmedQuery = query.trim().toLowerCase();
+  const hasAnyMatch = !trimmedQuery || ALL_ICONS.some((entry) => entry.label.toLowerCase().includes(trimmedQuery));
 
   return (
     <View style={styles.screen}>
@@ -43,7 +49,7 @@ export default function ChooseIcon() {
             </View>
             <View>
               <Text style={styles.selectedLabel}>SELECTED</Text>
-              <Text style={styles.selectedName}>Current icon</Text>
+              <Text style={styles.selectedName}>{currentLabel}</Text>
             </View>
           </View>
           <View style={styles.photoTile}>
@@ -51,15 +57,27 @@ export default function ChooseIcon() {
           </View>
         </View>
 
+        {!hasAnyMatch && (
+          <Text style={styles.noResults}>No icons match &quot;{query.trim()}&quot;</Text>
+        )}
+
         {ICON_CATEGORIES.map((cat) => {
-          if (query && !cat.label.toLowerCase().includes(query.toLowerCase())) return null;
+          const matches = trimmedQuery
+            ? cat.icons.filter((entry) => entry.label.toLowerCase().includes(trimmedQuery))
+            : cat.icons;
+          if (matches.length === 0) return null;
           return (
             <View key={cat.label} style={{ marginBottom: 18 }}>
               <Text style={styles.categoryLabel}>{cat.label.toUpperCase()}</Text>
               <View style={styles.grid}>
-                {cat.icons.map((icon) => (
-                  <View key={icon} style={styles.gridItem}>
-                    <IconTile icon={icon} selected={icon === current} onPress={() => pick(icon)} />
+                {matches.map((entry) => (
+                  <View key={entry.icon} style={styles.gridItem}>
+                    <IconTile
+                      icon={entry.icon}
+                      label={entry.label}
+                      selected={entry.icon === current}
+                      onPress={() => pick(entry.icon)}
+                    />
                   </View>
                 ))}
               </View>
@@ -85,6 +103,7 @@ const styles = StyleSheet.create({
   selectedName: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
   photoTile: { width: 96, backgroundColor: colors.card, borderWidth: 1.5, borderColor: colors.dashedBorder, borderStyle: 'dashed', borderRadius: radii.md + 2, alignItems: 'center', justifyContent: 'center', gap: 3, opacity: 0.55 },
   categoryLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1, color: colors.textFaint, marginBottom: 10 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
-  gridItem: { width: '14%' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, rowGap: 14 },
+  gridItem: { width: '21.5%' },
+  noResults: { fontSize: 13, color: colors.textMuted, textAlign: 'center', marginTop: 20, marginBottom: 8 },
 });
