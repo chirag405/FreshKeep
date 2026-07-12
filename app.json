@@ -39,7 +39,13 @@
       "expo-sqlite",
       "expo-web-browser",
       "expo-notifications",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "FreshKeep uses the camera to scan printed expiry dates."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

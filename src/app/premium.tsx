@@ -33,7 +33,7 @@ export default function Premium() {
       <View style={{ height: 40 }} />
       {isPremium ? (
         <View style={styles.cta}>
-          <Text style={styles.ctaText}>You're already on Premium ✓</Text>
+          <Text style={styles.ctaText}>You&apos;re already on Premium ✓</Text>
         </View>
       ) : (
         <>

@@ -115,7 +115,7 @@ export default function Settings() {
         On the free plan everything stays on this device. Premium encrypts a copy to the cloud so you can restore it on any device.
       </Text>
 
-      <Text style={styles.version}>FreshKeep · Version 1.0{'\n'}Remembers your dates, so you don't have to.</Text>
+      <Text style={styles.version}>FreshKeep · Version 1.0{'\n'}Remembers your dates, so you don&apos;t have to.</Text>
     </ScrollView>
   );
 }

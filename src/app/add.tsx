@@ -9,6 +9,7 @@ import { Toggle } from '@/components/Toggle';
 import { suggestIcon } from '@/lib/iconSuggest';
 import { formatDate, todayISODate } from '@/lib/dateMath';
 import { onIconSelected, clearIconListener } from '@/lib/iconSelectionChannel';
+import { onDateScanned, clearScanListener } from '@/lib/ocr/scanResultChannel';
 import { useExpiryStore } from '@/store/expiryStore';
 import { useLastTimeStore } from '@/store/lastTimeStore';
 import { scheduleReminder } from '@/notifications';
@@ -47,12 +48,12 @@ export default function Add() {
   }, []);
 
   useEffect(() => {
-    if (!iconTouched && name.trim().length > 0) {
-      setIcon(suggestIcon(name, section));
-    }
-  }, [name, section, iconTouched]);
+    onDateScanned((iso) => setExpiryDate(iso));
+    return () => clearScanListener();
+  }, []);
 
   const recentChips = section === 'expiry' ? RECENT_EXPIRY : RECENT_TASKS;
+  const displayIcon = !iconTouched && name.trim().length > 0 ? suggestIcon(name, section) : icon;
 
   const save = async () => {
     const trimmed = name.trim();
@@ -61,7 +62,7 @@ export default function Add() {
     if (section === 'expiry') {
       const row = await addExpiryItem({
         name: trimmed,
-        icon,
+        icon: displayIcon,
         expiryDate,
         reminderEnabled,
         reminderDaysBefore: 2,
@@ -72,14 +73,14 @@ export default function Add() {
         await scheduleReminder({
           id: `expiry-${row.id}`,
           title: 'FreshKeep',
-          body: `${icon} ${trimmed} expires soon`,
+          body: `${displayIcon} ${trimmed} expires soon`,
           date: triggerDate,
         });
       }
     } else {
       const row = await addTask({
         name: trimmed,
-        icon,
+        icon: displayIcon,
         repeatIntervalDays: repeatDays,
         reminderEnabled,
       });
@@ -89,7 +90,7 @@ export default function Add() {
         await scheduleReminder({
           id: `lasttime-${row.id}`,
           title: 'FreshKeep',
-          body: `${icon} ${row.repeat_interval_days} days since you ${trimmed.toLowerCase()}`,
+          body: `${displayIcon} ${row.repeat_interval_days} days since you ${trimmed.toLowerCase()}`,
           date: triggerDate,
         });
       }
@@ -121,9 +122,9 @@ export default function Add() {
           <View style={styles.nameRow}>
             <Pressable
               style={styles.iconButton}
-              onPress={() => router.push({ pathname: '/choose-icon', params: { selected: icon } })}
+              onPress={() => router.push({ pathname: '/choose-icon', params: { selected: displayIcon } })}
             >
-              <Text style={{ fontSize: 28 }}>{icon}</Text>
+              <Text style={{ fontSize: 28 }}>{displayIcon}</Text>
               <View style={styles.iconEditBadge}>
                 <Text style={{ color: '#fff', fontSize: 10 }}>✎</Text>
               </View>
@@ -161,9 +162,9 @@ export default function Add() {
                 <Pressable style={styles.quickButton} onPress={() => setShowDatePicker(true)}>
                   <Text style={styles.quickButtonText}>Pick</Text>
                 </Pressable>
-                <View style={[styles.quickButton, styles.scanButton]}>
-                  <Text style={[styles.quickButtonText, { color: '#fff' }]}>Scan (soon)</Text>
-                </View>
+                <Pressable style={[styles.quickButton, styles.scanButton]} onPress={() => router.push('/scan')}>
+                  <Text style={[styles.quickButtonText, { color: '#fff' }]}>Scan</Text>
+                </Pressable>
               </View>
               {showDatePicker && (
                 <DateTimePicker
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
   quickRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
   quickButton: { flex: 1, alignItems: 'center', backgroundColor: colors.card, paddingVertical: 11, borderRadius: 11 },
   quickButtonText: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
-  scanButton: { backgroundColor: colors.primary, opacity: 0.6 },
+  scanButton: { backgroundColor: colors.primary },
   reminderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.card, borderRadius: radii.md + 2, padding: 16, marginTop: 18 },
   reminderTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
   reminderSubtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },

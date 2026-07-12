@@ -15,11 +15,13 @@ export default function RootLayout() {
   useEffect(() => {
     migrate();
     initNotifications();
-    initAuth().then(() => {
-      // Fire-and-forget: no-op for free/unauthenticated users (see src/sync).
-      pullAndMergeAll();
+    initAuth().then(async () => {
+      // No-op for free/unauthenticated users (see src/sync) — awaited so the
+      // Stack only renders once auth state is actually known, avoiding a
+      // flash of "not signed in" for an already-signed-in Premium user.
+      await pullAndMergeAll();
+      setReady(true);
     });
-    setReady(true);
   }, [initAuth]);
 
   if (!ready) {
@@ -37,6 +39,7 @@ export default function RootLayout() {
       <Stack.Screen name="settings" />
       <Stack.Screen name="add" options={{ presentation: 'modal' }} />
       <Stack.Screen name="choose-icon" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="scan" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="login" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="verify" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
