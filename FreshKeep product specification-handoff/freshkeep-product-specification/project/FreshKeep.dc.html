@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<style>
+  body{margin:0;background:#E9E6DE;-webkit-font-smoothing:antialiased;font-family:-apple-system,system-ui,"SF Pro Text",sans-serif;color:#12211B}
+  a{color:#157A5B;text-decoration:none}a:hover{color:#0F5A44}
+  .cap{font:600 13px/1 -apple-system,system-ui;color:#6B716C;display:flex;align-items:center;gap:8px;margin:0 4px 14px}
+  .cap b{font-weight:700;color:#12211B;font-size:14px}
+  .cn{font:700 11px/1 ui-monospace,Menlo,monospace;background:#157A5B;color:#fff;padding:4px 7px;border-radius:6px}
+</style>
+</helmet>
+
+<div style="padding:56px 60px 90px;min-width:4260px">
+
+  <!-- ── Board header ─────────────────────────────────────── -->
+  <div style="max-width:660px;margin-bottom:46px">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:16px">
+      <div style="width:32px;height:32px;border-radius:9px;background:#157A5B;display:flex;align-items:center;justify-content:center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 19C5 11 11 6 20 5C19 14 14 20 6 20C6 20 5 20 5 19Z" fill="#fff"/><path d="M6 18C9 14 13 11 17 9.5" stroke="#157A5B" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <span style="font-size:12px;font-weight:700;letter-spacing:2px;color:#157A5B">FRESHKEEP · iOS · STATIC SCREENS</span>
+    </div>
+    <h1 style="font-size:44px;font-weight:800;letter-spacing:-1.4px;margin:0 0 14px;line-height:1.03">Remembers your dates — what's<br>expiring, and what's overdue.</h1>
+    <p style="font-size:16px;line-height:1.55;color:#4B514C;margin:0">Two simple sections: things that <b>expire</b>, and things you <b>last did</b>. Sign in with your number or Google; data stays on-device for free — or sync across devices with <b>Premium</b>. Reminders only if you ask. Pan across the nine screens →</p>
+  </div>
+
+  <!-- ── Phone row ─────────────────────────────────────────── -->
+  <div style="display:flex;gap:52px;align-items:flex-start">
+
+    <!-- ════════ S1 · LOGIN (dark) ════════ -->
+    <figure data-screen-label="S1 Login" style="margin:0">
+      <figcaption class="cap"><span class="cn">S1</span> <b>Log in</b> · phone or Google</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="1" hint-size="402px,874px">
+        <div style="height:100%;background:radial-gradient(120% 80% at 50% 10%,#123328 0%,#07120E 62%,#05100C 100%);display:flex;flex-direction:column;color:#fff;padding:0 26px">
+          <div style="padding-top:96px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(160deg,#1FA574,#12613F);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(21,122,91,.45)">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none"><path d="M5 19C5 11 11 6 20 5C19 14 14 20 6 20C6 20 5 20 5 19Z" fill="#fff"/><path d="M6 18C9 14 13 11 17 9.5" stroke="#12613F" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div style="font-size:25px;font-weight:800;letter-spacing:-.5px;margin-top:18px">Welcome to FreshKeep</div>
+            <div style="font-size:15px;color:rgba(255,255,255,.55);margin-top:6px;text-align:center;line-height:1.4">Sign in to save your list and<br>sync across devices</div>
+          </div>
+
+          <div style="flex:1"></div>
+
+          <!-- phone field -->
+          <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:rgba(255,255,255,.5);margin:0 2px 8px">MOBILE NUMBER</div>
+          <div style="display:flex;gap:8px">
+            <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:15px 14px;font-size:17px;font-weight:600;display:flex;align-items:center;gap:6px">🇮🇳 +91</div>
+            <div style="flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:15px 16px;font-size:17px;display:flex;align-items:center">98765 43210<span style="width:2px;height:20px;background:#2FBB84;margin-left:3px"></span></div>
+          </div>
+          <div style="background:#157A5B;color:#fff;text-align:center;font-size:17px;font-weight:700;padding:16px;border-radius:15px;margin-top:14px;box-shadow:0 10px 24px rgba(21,122,91,.4)">Send code</div>
+
+          <!-- divider -->
+          <div style="display:flex;align-items:center;gap:12px;margin:20px 0">
+            <div style="flex:1;height:1px;background:rgba(255,255,255,.14)"></div>
+            <span style="font-size:13px;color:rgba(255,255,255,.45)">or</span>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,.14)"></div>
+          </div>
+
+          <!-- google -->
+          <div style="background:#fff;border-radius:15px;padding:15px;display:flex;align-items:center;justify-content:center;gap:11px;font-size:16px;font-weight:600;color:#1F1F1F">
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.8-6.8C35.6 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.5 13.2l7.9 6.2C12.2 13.7 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9.1h12.4c-.5 2.9-2.1 5.3-4.6 7l7.1 5.5C43.6 37.5 46.1 31.6 46.1 24.6z"/><path fill="#FBBC05" d="M10.4 28.4c-.5-1.5-.8-3-.8-4.4s.3-3 .8-4.4l-7.9-6.2C.9 16.3 0 20 0 24s.9 7.7 2.5 10.6l7.9-6.2z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8.1 2.1-6.4 0-11.8-4.2-13.6-9.9l-7.9 6.2C6.4 42.6 14.6 48 24 48z"/></svg>
+            Continue with Google
+          </div>
+
+          <div style="text-align:center;font-size:12px;color:rgba(255,255,255,.4);margin:22px 0 40px;line-height:1.5">By continuing you agree to our Terms.<br>Prefer no account? <span style="color:#7FDCB6;font-weight:600">Use device lock instead</span></div>
+        </div>
+      </x-import>
+    </figure>
+
+    <!-- ════════ S2 · VERIFY OTP (dark) ════════ -->
+    <figure data-screen-label="S2 Verify OTP" style="margin:0">
+      <figcaption class="cap"><span class="cn">S2</span> <b>Verify</b> · one-time code</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="1" hint-size="402px,874px">
+        <div style="height:100%;background:radial-gradient(120% 80% at 50% 10%,#123328 0%,#07120E 62%,#05100C 100%);display:flex;flex-direction:column;color:#fff;padding:0 26px">
+          <div style="padding-top:62px">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><svg width="11" height="18" viewBox="0 0 11 18" fill="none"><path d="M9 2L2 9l7 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div style="padding-top:44px">
+            <div style="font-size:28px;font-weight:800;letter-spacing:-.5px">Enter the code</div>
+            <div style="font-size:15px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.45">We sent a 6-digit code to<br><b style="color:#fff;font-weight:600">+91 98765 43210</b> · <span style="color:#7FDCB6">Change</span></div>
+          </div>
+          <!-- OTP boxes -->
+          <div style="display:flex;gap:9px;margin-top:34px">
+            <div style="flex:1;aspect-ratio:1/1.15;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.16);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700">4</div>
+            <div style="flex:1;aspect-ratio:1/1.15;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.16);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700">2</div>
+            <div style="flex:1;aspect-ratio:1/1.15;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.16);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700">8</div>
+            <div style="flex:1;aspect-ratio:1/1.15;background:rgba(47,187,132,.14);border:1.5px solid #2FBB84;border-radius:14px;display:flex;align-items:center;justify-content:center"><span style="width:2px;height:26px;background:#2FBB84"></span></div>
+            <div style="flex:1;aspect-ratio:1/1.15;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:14px"></div>
+            <div style="flex:1;aspect-ratio:1/1.15;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:14px"></div>
+          </div>
+          <div style="font-size:14px;color:rgba(255,255,255,.45);margin-top:20px;text-align:center">Resend code in <b style="color:#fff;font-weight:600">0:24</b></div>
+
+          <div style="flex:1"></div>
+          <div style="background:#157A5B;color:#fff;text-align:center;font-size:17px;font-weight:700;padding:16px;border-radius:15px;box-shadow:0 10px 24px rgba(21,122,91,.4)">Verify &amp; continue</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;color:rgba(255,255,255,.45);margin:20px 0 40px">
+            <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="1" y="6" width="10" height="7" rx="1.6" stroke="rgba(255,255,255,.6)" stroke-width="1.3"/><path d="M3 6V4a3 3 0 016 0v2" stroke="rgba(255,255,255,.6)" stroke-width="1.3"/></svg>
+            Protected end-to-end
+          </div>
+        </div>
+      </x-import>
+    </figure>
+
+    <!-- ════════ S3 · HOME · EXPIRING ════════ -->
+    <figure data-screen-label="S3 Home Expiring" style="margin:0">
+      <figcaption class="cap"><span class="cn">S3</span> <b>Home</b> · Expiring tab</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;position:relative;background:#F4F2EC">
+          <div style="padding:56px 20px 10px;flex-shrink:0">
+            <div style="font-size:13px;font-weight:600;color:#157A5B;letter-spacing:.2px">Sunday, 12 July</div>
+            <div style="font-size:30px;font-weight:800;letter-spacing:-.8px;margin-top:2px">FreshKeep</div>
+            <div style="display:flex;background:#E4E1D7;border-radius:12px;padding:3px;gap:3px;margin-top:16px">
+              <div style="flex:1;text-align:center;padding:8px 0;border-radius:9px;background:#fff;font-weight:600;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,.07)">🥛 Expiring</div>
+              <div style="flex:1;text-align:center;padding:8px 0;font-size:14px;color:#7A807B;font-weight:500">🛏️ Last time</div>
+            </div>
+          </div>
+          <div style="flex:1;overflow:auto;padding:8px 16px 118px">
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#B84B41;padding:12px 6px 8px">NEEDS ATTENTION</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04);position:relative;overflow:hidden">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#E0483D"></div>
+                <div style="width:44px;height:44px;border-radius:12px;background:#FBEAE8;display:flex;align-items:center;justify-content:center;font-size:23px">🥬</div>
+                <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Spinach</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Fridge · added 6 days ago</div></div>
+                <div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#E0483D;line-height:1;letter-spacing:-.5px">Today</div><div style="font-size:11px;color:#C05348;margin-top:3px">expires</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04);position:relative;overflow:hidden">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#E0483D"></div>
+                <div style="width:44px;height:44px;border-radius:12px;background:#EEF3F6;display:flex;align-items:center;justify-content:center;font-size:23px">🥛</div>
+                <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Milk (2%)</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Fridge · opened 3 days ago</div></div>
+                <div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#E0483D;line-height:1;letter-spacing:-.5px">2<span style="font-size:13px;font-weight:700"> days</span></div><div style="font-size:11px;color:#C05348;margin-top:3px">left</div></div>
+              </div>
+            </div>
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#B98428;padding:20px 6px 8px">THIS WEEK</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04);position:relative;overflow:hidden">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#E8A23D"></div>
+                <div style="width:44px;height:44px;border-radius:12px;background:#FBF3E4;display:flex;align-items:center;justify-content:center;font-size:23px">🍗</div>
+                <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Chicken thighs</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Freezer · added 2 days ago</div></div>
+                <div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#C9871F;line-height:1;letter-spacing:-.5px">5<span style="font-size:13px;font-weight:700"> days</span></div><div style="font-size:11px;color:#B98428;margin-top:3px">left</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04);position:relative;overflow:hidden">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#E8A23D"></div>
+                <div style="width:44px;height:44px;border-radius:12px;background:#F1EEFA;display:flex;align-items:center;justify-content:center;font-size:23px">💊</div>
+                <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Paracetamol</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Medicine box</div></div>
+                <div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#C9871F;line-height:1;letter-spacing:-.5px">6<span style="font-size:13px;font-weight:700"> days</span></div><div style="font-size:11px;color:#B98428;margin-top:3px">left</div></div>
+              </div>
+            </div>
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#3E8E64;padding:20px 6px 8px">FINE FOR NOW</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04);position:relative;overflow:hidden">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#2E9E6B"></div>
+                <div style="width:44px;height:44px;border-radius:12px;background:#EAF4EE;display:flex;align-items:center;justify-content:center;font-size:23px">🥚</div>
+                <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Eggs</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Fridge · dozen</div></div>
+                <div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#2E9E6B;line-height:1;letter-spacing:-.5px">18<span style="font-size:13px;font-weight:700"> days</span></div><div style="font-size:11px;color:#3E8E64;margin-top:3px">left</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04);position:relative;overflow:hidden">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#2E9E6B"></div>
+                <div style="width:44px;height:44px;border-radius:12px;background:#F3EEE6;display:flex;align-items:center;justify-content:center;font-size:23px">🍞</div>
+                <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Sourdough</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Pantry</div></div>
+                <div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#2E9E6B;line-height:1;letter-spacing:-.5px">9<span style="font-size:13px;font-weight:700"> days</span></div><div style="font-size:11px;color:#3E8E64;margin-top:3px">left</div></div>
+              </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:40px;display:flex;justify-content:center;pointer-events:none">
+            <div style="display:flex;align-items:center;gap:8px;background:#157A5B;color:#fff;font-weight:600;font-size:16px;padding:15px 26px;border-radius:999px;box-shadow:0 8px 22px rgba(21,122,91,.45)">
+              <svg width="17" height="17" viewBox="0 0 17 17"><path d="M8.5 2v13M2 8.5h13" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg> Add item
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </figure>
+
+    <!-- ════════ S4 · HOME · LAST TIME ════════ -->
+    <figure data-screen-label="S4 Home LastTime" style="margin:0">
+      <figcaption class="cap"><span class="cn">S4</span> <b>Home</b> · Last Time I… tab</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;position:relative;background:#F4F2EC">
+          <div style="padding:56px 20px 10px;flex-shrink:0">
+            <div style="font-size:13px;font-weight:600;color:#157A5B;letter-spacing:.2px">Sunday, 12 July</div>
+            <div style="font-size:30px;font-weight:800;letter-spacing:-.8px;margin-top:2px">FreshKeep</div>
+            <div style="display:flex;background:#E4E1D7;border-radius:12px;padding:3px;gap:3px;margin-top:16px">
+              <div style="flex:1;text-align:center;padding:8px 0;font-size:14px;color:#7A807B;font-weight:500">🥛 Expiring</div>
+              <div style="flex:1;text-align:center;padding:8px 0;border-radius:9px;background:#fff;font-weight:600;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,.07)">🛏️ Last time</div>
+            </div>
+          </div>
+          <div style="flex:1;overflow:auto;padding:8px 16px 118px">
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#B84B41;padding:12px 6px 8px">OVERDUE</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:#fff;border-radius:18px;padding:13px 15px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+                <div style="display:flex;align-items:center;gap:13px">
+                  <div style="width:44px;height:44px;border-radius:12px;background:#FBEAE8;display:flex;align-items:center;justify-content:center;font-size:23px">🌀</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Cleaned the AC filter</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Last done <b style="color:#E0483D;font-weight:700">41 days ago</b></div></div>
+                  <div style="font-size:12px;font-weight:700;color:#E0483D;background:#FBEAE8;padding:5px 9px;border-radius:8px">11d over</div>
+                </div>
+                <div style="height:6px;border-radius:999px;background:#EDEBE3;margin-top:12px;overflow:hidden"><div style="height:100%;width:100%;background:#E0483D;border-radius:999px"></div></div>
+                <div style="font-size:11px;color:#A0A6A1;margin-top:6px">Every 30 days</div>
+              </div>
+            </div>
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#B98428;padding:20px 6px 8px">DUE SOON</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:#fff;border-radius:18px;padding:13px 15px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+                <div style="display:flex;align-items:center;gap:13px">
+                  <div style="width:44px;height:44px;border-radius:12px;background:#F1EEFA;display:flex;align-items:center;justify-content:center;font-size:23px">🛏️</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Changed the bedsheets</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Last done <b style="color:#12211B;font-weight:700">12 days ago</b></div></div>
+                  <div style="font-size:12px;font-weight:700;color:#C9871F;background:#FBF3E4;padding:5px 9px;border-radius:8px">2d left</div>
+                </div>
+                <div style="height:6px;border-radius:999px;background:#EDEBE3;margin-top:12px;overflow:hidden"><div style="height:100%;width:86%;background:#E8A23D;border-radius:999px"></div></div>
+                <div style="font-size:11px;color:#A0A6A1;margin-top:6px">Every 14 days</div>
+              </div>
+            </div>
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#3E8E64;padding:20px 6px 8px">ON TRACK</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:#fff;border-radius:18px;padding:13px 15px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+                <div style="display:flex;align-items:center;gap:13px">
+                  <div style="width:44px;height:44px;border-radius:12px;background:#EAF4EE;display:flex;align-items:center;justify-content:center;font-size:23px">🪥</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Replaced toothbrush</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Last done <b style="color:#12211B;font-weight:700">32 days ago</b></div></div>
+                  <div style="font-size:12px;font-weight:700;color:#3E8E64;background:#EAF4EE;padding:5px 9px;border-radius:8px">58d left</div>
+                </div>
+                <div style="height:6px;border-radius:999px;background:#EDEBE3;margin-top:12px;overflow:hidden"><div style="height:100%;width:36%;background:#2E9E6B;border-radius:999px"></div></div>
+                <div style="font-size:11px;color:#A0A6A1;margin-top:6px">Every 90 days</div>
+              </div>
+              <div style="background:#fff;border-radius:18px;padding:13px 15px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+                <div style="display:flex;align-items:center;gap:13px">
+                  <div style="width:44px;height:44px;border-radius:12px;background:#EAF4EE;display:flex;align-items:center;justify-content:center;font-size:23px">🪴</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">Watered the plants</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Last done <b style="color:#12211B;font-weight:700">3 days ago</b></div></div>
+                  <div style="font-size:20px">✔️</div>
+                </div>
+                <div style="font-size:11px;color:#A0A6A1;margin-top:10px">No reminder set · tap to add one</div>
+              </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:40px;display:flex;justify-content:center;pointer-events:none">
+            <div style="display:flex;align-items:center;gap:8px;background:#157A5B;color:#fff;font-weight:600;font-size:16px;padding:15px 26px;border-radius:999px;box-shadow:0 8px 22px rgba(21,122,91,.45)">
+              <svg width="17" height="17" viewBox="0 0 17 17"><path d="M8.5 2v13M2 8.5h13" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg> Add task
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </figure>
+
+    <!-- ════════ S5 · ADD SHEET (with icon picker) ════════ -->
+    <figure data-screen-label="S5 Add" style="margin:0">
+      <figcaption class="cap"><span class="cn">S5</span> <b>Add</b> · auto-picked icon, editable</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div style="height:100%;position:relative;background:#F4F2EC;overflow:hidden">
+          <div style="position:absolute;inset:0;padding:56px 20px;filter:blur(1px);opacity:.5">
+            <div style="font-size:30px;font-weight:800;letter-spacing:-.8px">FreshKeep</div>
+            <div style="height:44px;background:#E4E1D7;border-radius:12px;margin-top:16px"></div>
+            <div style="height:70px;background:#fff;border-radius:18px;margin-top:20px"></div>
+          </div>
+          <div style="position:absolute;inset:0;background:rgba(10,20,15,.34)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#F4F2EC;border-radius:26px 26px 0 0;padding:10px 20px 34px;box-shadow:0 -12px 40px rgba(0,0,0,.2)">
+            <div style="width:38px;height:5px;border-radius:999px;background:#CFCCC2;margin:0 auto 16px"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <span style="font-size:15px;color:#157A5B;font-weight:500">Cancel</span>
+              <span style="font-size:17px;font-weight:700">New item</span>
+              <span style="font-size:15px;color:#157A5B;font-weight:600">Save</span>
+            </div>
+            <div style="display:flex;background:#E4E1D7;border-radius:12px;padding:3px;gap:3px;margin-bottom:18px">
+              <div style="flex:1;text-align:center;padding:8px 0;border-radius:9px;background:#fff;font-weight:600;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,.07)">🥛 Expires</div>
+              <div style="flex:1;text-align:center;padding:8px 0;font-size:14px;color:#7A807B;font-weight:500">🛏️ Last time</div>
+            </div>
+            <!-- name + icon -->
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#9AA09B;margin:2px 0 8px">NAME &amp; ICON</div>
+            <div style="display:flex;gap:10px;align-items:stretch">
+              <!-- auto-picked icon, tap to change -->
+              <div style="position:relative;width:56px;flex-shrink:0">
+                <div style="width:56px;height:56px;border-radius:15px;background:#EEF3F6;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 1px 2px rgba(20,40,30,.05)">🥛</div>
+                <div style="position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:#157A5B;border:2px solid #F4F2EC;display:flex;align-items:center;justify-content:center">
+                  <svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M9.5 2.5l2 2L5 11l-2.6.6L3 9l6.5-6.5z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+              <div style="flex:1;background:#fff;border-radius:14px;padding:0 16px;font-size:17px;display:flex;align-items:center;box-shadow:0 1px 2px rgba(20,40,30,.05)">
+                Milk (2%)<span style="width:2px;height:22px;background:#157A5B;margin-left:2px"></span>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#9AA09B;margin:8px 2px 0">Icon picked automatically — tap it to change</div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+              <span style="font-size:13px;font-weight:600;background:#EAF4EE;color:#157A5B;padding:7px 13px;border-radius:999px">Milk</span>
+              <span style="font-size:13px;font-weight:500;background:#fff;color:#4B514C;padding:7px 13px;border-radius:999px;box-shadow:0 1px 2px rgba(0,0,0,.05)">Bread</span>
+              <span style="font-size:13px;font-weight:500;background:#fff;color:#4B514C;padding:7px 13px;border-radius:999px;box-shadow:0 1px 2px rgba(0,0,0,.05)">Eggs</span>
+              <span style="font-size:13px;font-weight:500;background:#fff;color:#4B514C;padding:7px 13px;border-radius:999px;box-shadow:0 1px 2px rgba(0,0,0,.05)">Paracetamol</span>
+            </div>
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#9AA09B;margin:20px 0 8px">EXPIRES</div>
+            <div style="background:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 2px rgba(20,40,30,.05)">
+              <span style="font-size:17px;font-weight:600">Thu, 14 July 2026</span>
+              <span style="font-size:14px;font-weight:700;color:#157A5B;background:#EAF4EE;padding:4px 10px;border-radius:8px">2 days</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <div style="flex:1;text-align:center;background:#fff;padding:11px 0;border-radius:11px;font-size:14px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.05)">+1 week</div>
+              <div style="flex:1;text-align:center;background:#fff;padding:11px 0;border-radius:11px;font-size:14px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.05)">+1 month</div>
+              <div style="flex:1;text-align:center;background:#fff;padding:11px 0;border-radius:11px;font-size:14px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.05)">Pick</div>
+              <div style="flex:1;text-align:center;background:#157A5B;color:#fff;padding:11px 0;border-radius:11px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px">
+                <svg width="15" height="14" viewBox="0 0 16 14" fill="none"><rect x="1" y="3" width="14" height="10" rx="2.2" stroke="#fff" stroke-width="1.4"/><circle cx="8" cy="8" r="2.6" stroke="#fff" stroke-width="1.4"/><path d="M5.5 3l1-1.5h3L10.5 3" stroke="#fff" stroke-width="1.4"/></svg>Scan
+              </div>
+            </div>
+            <div style="background:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-top:18px;box-shadow:0 1px 2px rgba(20,40,30,.05)">
+              <div><div style="font-size:16px;font-weight:600">Remind me</div><div style="font-size:13px;color:#8A908B;margin-top:2px">2 days before it expires</div></div>
+              <div style="width:51px;height:31px;border-radius:999px;background:#2E9E6B;padding:2px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center"><div style="width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2)"></div></div>
+            </div>
+            <div style="background:#157A5B;color:#fff;text-align:center;font-size:17px;font-weight:700;padding:16px;border-radius:15px;margin-top:18px;box-shadow:0 8px 20px rgba(21,122,91,.4)">Add to FreshKeep</div>
+          </div>
+        </div>
+      </x-import>
+    </figure>
+
+    <!-- ════════ S6 · CHOOSE ICON ════════ -->
+    <figure data-screen-label="S6 Choose icon" style="margin:0">
+      <figcaption class="cap"><span class="cn">S6</span> <b>Choose an icon</b> · presets + photo</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div style="height:100%;position:relative;background:#F4F2EC;overflow:hidden">
+          <div style="position:absolute;inset:0;background:rgba(10,20,15,.34)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;top:120px;background:#F4F2EC;border-radius:26px 26px 0 0;padding:10px 20px 24px;box-shadow:0 -12px 40px rgba(0,0,0,.2);display:flex;flex-direction:column">
+            <div style="width:38px;height:5px;border-radius:999px;background:#CFCCC2;margin:0 auto 14px"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <span style="font-size:15px;color:#157A5B;font-weight:500">Cancel</span>
+              <span style="font-size:17px;font-weight:700">Choose an icon</span>
+              <span style="font-size:15px;color:#157A5B;font-weight:600">Done</span>
+            </div>
+            <!-- search -->
+            <div style="background:#E7E4DB;border-radius:12px;padding:9px 13px;display:flex;align-items:center;gap:8px;color:#9AA09B;font-size:15px;margin-bottom:8px">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#9AA09B" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="#9AA09B" stroke-width="1.6" stroke-linecap="round"/></svg>Search icons
+            </div>
+            <div style="flex:1;overflow:auto;padding-top:6px">
+              <!-- current selection + photo option -->
+              <div style="display:flex;gap:10px;margin-bottom:16px">
+                <div style="flex:1;background:#fff;border-radius:14px;padding:12px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 2px rgba(20,40,30,.05)">
+                  <div style="width:42px;height:42px;border-radius:11px;background:#EEF3F6;display:flex;align-items:center;justify-content:center;font-size:24px">🥛</div>
+                  <div><div style="font-size:11px;color:#9AA09B;font-weight:600">SELECTED</div><div style="font-size:15px;font-weight:600">Milk</div></div>
+                </div>
+                <div style="width:96px;background:#fff;border:1.5px dashed #CFCCC2;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#7A807B">
+                  <svg width="18" height="16" viewBox="0 0 18 16" fill="none"><rect x="1" y="3.5" width="16" height="11" rx="2.4" stroke="#7A807B" stroke-width="1.4"/><circle cx="9" cy="9" r="3" stroke="#7A807B" stroke-width="1.4"/><path d="M6 3.5l1-1.5h4l1 1.5" stroke="#7A807B" stroke-width="1.4"/></svg>
+                  <span style="font-size:11px;font-weight:600">Photo</span>
+                </div>
+              </div>
+              <div style="font:700 11px/1 -apple-system,system-ui;letter-spacing:1px;color:#9AA09B;margin:4px 2px 10px">FOOD &amp; DRINK</div>
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:18px">
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;border:2px solid #157A5B;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🥛</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🍞</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🥚</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🧀</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🥬</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🍗</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🍎</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🍌</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🐟</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🍚</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🧃</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🫙</div>
+              </div>
+              <div style="font:700 11px/1 -apple-system,system-ui;letter-spacing:1px;color:#9AA09B;margin:4px 2px 10px">HEALTH</div>
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:18px">
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">💊</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🩹</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🧴</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🦷</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🌡️</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">💧</div>
+              </div>
+              <div style="font:700 11px/1 -apple-system,system-ui;letter-spacing:1px;color:#9AA09B;margin:4px 2px 10px">HOME &amp; CHORES</div>
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:9px">
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🛏️</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🪥</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🌀</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🧻</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🪴</div>
+                <div style="aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.05)">🔋</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </figure>
+
+    <!-- ════════ S7 · DETAIL ════════ -->
+    <figure data-screen-label="S7 Detail" style="margin:0">
+      <figcaption class="cap"><span class="cn">S7</span> <b>Item detail</b> · reminder</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;background:#F4F2EC">
+          <div style="padding:56px 18px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+            <div style="display:flex;align-items:center;gap:3px;color:#157A5B"><svg width="11" height="18" viewBox="0 0 11 18" fill="none"><path d="M9 2L2 9l7 7" stroke="#157A5B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:16px">Expiring</span></div>
+            <span style="font-size:16px;color:#157A5B;font-weight:500">Edit</span>
+          </div>
+          <div style="flex:1;overflow:auto;padding:8px 16px 30px">
+            <div style="display:flex;flex-direction:column;align-items:center;padding:14px 0 20px">
+              <div style="width:78px;height:78px;border-radius:22px;background:#EEF3F6;display:flex;align-items:center;justify-content:center;font-size:40px">🥛</div>
+              <div style="font-size:26px;font-weight:800;letter-spacing:-.6px;margin-top:14px">Milk (2%)</div>
+              <div style="display:inline-flex;align-items:center;gap:6px;background:#FBEAE8;color:#C43F35;font-size:14px;font-weight:700;padding:7px 14px;border-radius:999px;margin-top:10px"><span style="width:8px;height:8px;border-radius:50%;background:#E0483D"></span>Expires in 2 days</div>
+            </div>
+            <div style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:15px;color:#8A908B">Expiry date</span><span style="font-size:16px;font-weight:600">Thu, 14 July 2026</span></div>
+              <div style="height:1px;background:#EFEDE5;margin:13px 0"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:15px;color:#8A908B">Location</span><span style="font-size:16px;font-weight:600">Fridge</span></div>
+              <div style="height:1px;background:#EFEDE5;margin:13px 0"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:15px;color:#8A908B">Added</span><span style="font-size:16px;font-weight:600">6 Jul · opened 3 days ago</span></div>
+            </div>
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#9AA09B;margin:22px 6px 8px">REMINDER</div>
+            <div style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:11px"><span style="font-size:20px">🔔</span><span style="font-size:16px;font-weight:600">Remind me before</span></div>
+                <div style="width:51px;height:31px;border-radius:999px;background:#2E9E6B;padding:2px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center"><div style="width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2)"></div></div>
+              </div>
+              <div style="height:1px;background:#EFEDE5;margin:14px 0"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:15px;color:#8A908B">Lead time</span>
+                <div style="display:flex;align-items:center;gap:14px;background:#F4F2EC;border-radius:10px;padding:6px 8px"><span style="font-size:20px;font-weight:700;color:#B4B8B2">–</span><span style="font-size:16px;font-weight:700;min-width:56px;text-align:center">2 days</span><span style="font-size:20px;font-weight:700;color:#157A5B">+</span></div>
+              </div>
+              <div style="font-size:13px;color:#8A908B;margin-top:12px">You'll get one notification: “🥛 Milk expires in 2 days.”</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:22px">
+              <div style="flex:1;background:#157A5B;color:#fff;text-align:center;font-size:15px;font-weight:700;padding:14px 0;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font-size:18px">✅</span>Used it</div>
+              <div style="flex:1;background:#fff;color:#4B514C;text-align:center;font-size:15px;font-weight:600;padding:14px 0;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.05);display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font-size:18px">🗑️</span>Threw away</div>
+            </div>
+            <div style="text-align:center;color:#C43F35;font-size:15px;font-weight:600;margin-top:20px">Remove item</div>
+          </div>
+        </div>
+      </x-import>
+    </figure>
+
+    <!-- ════════ S8 · SETTINGS ════════ -->
+    <figure data-screen-label="S8 Settings" style="margin:0">
+      <figcaption class="cap"><span class="cn">S8</span> <b>Settings</b> · account &amp; sync</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;background:#F4F2EC">
+          <div style="padding:56px 20px 4px;flex-shrink:0">
+            <div style="display:flex;align-items:center;gap:3px;color:#157A5B;margin-bottom:6px"><svg width="11" height="18" viewBox="0 0 11 18" fill="none"><path d="M9 2L2 9l7 7" stroke="#157A5B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:16px">FreshKeep</span></div>
+            <div style="font-size:30px;font-weight:800;letter-spacing:-.8px">Settings</div>
+          </div>
+          <div style="flex:1;overflow:auto;padding:14px 16px 30px">
+            <!-- account -->
+            <div style="background:#fff;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:13px;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+              <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(150deg,#1FA574,#12613F);display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;font-weight:700">A</div>
+              <div style="flex:1"><div style="font-size:16px;font-weight:600">+91 98765 43210</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Signed in · free plan</div></div>
+              <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#C6C9C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <!-- premium banner -->
+            <div style="background:linear-gradient(145deg,#15503C,#0E3A2B);border-radius:16px;padding:16px;margin-top:14px;color:#fff;box-shadow:0 8px 20px rgba(14,58,43,.28)">
+              <div style="display:flex;align-items:center;gap:9px">
+                <span style="font-size:20px">☁️</span>
+                <div style="flex:1"><div style="font-size:16px;font-weight:700">Sync across devices</div><div style="font-size:12.5px;color:rgba(255,255,255,.65);margin-top:2px">Cloud backup + web access</div></div>
+                <span style="font-size:11px;font-weight:700;background:#E8C15A;color:#3A2B00;padding:4px 8px;border-radius:7px">PREMIUM</span>
+              </div>
+              <div style="background:rgba(255,255,255,.14);border-radius:11px;text-align:center;font-size:14px;font-weight:700;padding:11px;margin-top:13px">Upgrade — $1.99/mo</div>
+            </div>
+
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#9AA09B;margin:22px 6px 8px">REMINDERS</div>
+            <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px">
+                <div><div style="font-size:16px">Default lead time</div><div style="font-size:13px;color:#8A908B;margin-top:2px">Applied to new items</div></div>
+                <div style="display:flex;align-items:center;gap:5px;color:#8A908B;font-size:16px">2 days before <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#C6C9C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              </div>
+              <div style="height:1px;background:#EFEDE5;margin-left:16px"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px">
+                <span style="font-size:16px">Notification sound</span>
+                <div style="width:51px;height:31px;border-radius:999px;background:#2E9E6B;padding:2px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center"><div style="width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2)"></div></div>
+              </div>
+            </div>
+
+            <div style="font:700 11.5px/1 -apple-system,system-ui;letter-spacing:1px;color:#9AA09B;margin:22px 6px 8px">PRIVACY &amp; LOCK</div>
+            <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(20,40,30,.05),0 8px 18px rgba(20,40,30,.04)">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px">
+                <div style="display:flex;align-items:center;gap:11px"><span style="font-size:19px">🔒</span><span style="font-size:16px">Require Face ID to open</span></div>
+                <div style="width:51px;height:31px;border-radius:999px;background:#2E9E6B;padding:2px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:center"><div style="width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2)"></div></div>
+              </div>
+            </div>
+            <div style="font-size:12.5px;color:#9AA09B;line-height:1.5;padding:8px 8px 0">On the free plan everything stays on this iPhone. Premium encrypts a copy to the cloud so you can restore it on any device.</div>
+
+            <div style="text-align:center;color:#B4B8B2;font-size:12.5px;margin-top:26px;line-height:1.5">FreshKeep · Version 1.0<br>Remembers your dates, so you don't have to.</div>
+          </div>
+        </div>
+      </x-import>
+    </figure>
+
+    <!-- ════════ S9 · PREMIUM / CLOUD SYNC ════════ -->
+    <figure data-screen-label="S9 Premium" style="margin:0">
+      <figcaption class="cap"><span class="cn">S9</span> <b>Premium</b> · cloud sync paywall</figcaption>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="1" hint-size="402px,874px">
+        <div style="height:100%;background:radial-gradient(120% 70% at 50% 6%,#15503C 0%,#0A211A 60%,#06110D 100%);display:flex;flex-direction:column;color:#fff;padding:0 24px">
+          <div style="padding-top:58px;display:flex;justify-content:flex-end"><span style="font-size:22px;color:rgba(255,255,255,.5)">✕</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;padding-top:14px">
+            <div style="width:72px;height:72px;border-radius:22px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:36px">☁️</div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:2px;color:#E8C15A;margin-top:16px">FRESHKEEP PREMIUM</div>
+            <div style="font-size:26px;font-weight:800;letter-spacing:-.5px;margin-top:8px;text-align:center;line-height:1.15">Your dates, on every<br>device you own</div>
+          </div>
+
+          <!-- benefits -->
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:26px">
+            <div style="display:flex;align-items:center;gap:13px">
+              <div style="width:34px;height:34px;border-radius:10px;background:rgba(47,187,132,.18);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7.5" stroke="#2FBB84" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div style="font-size:15px"><b style="font-weight:600">Sync across iPhone, iPad &amp; web</b></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px">
+              <div style="width:34px;height:34px;border-radius:10px;background:rgba(47,187,132,.18);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7.5" stroke="#2FBB84" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div style="font-size:15px"><b style="font-weight:600">Automatic encrypted cloud backup</b></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px">
+              <div style="width:34px;height:34px;border-radius:10px;background:rgba(47,187,132,.18);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7.5" stroke="#2FBB84" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div style="font-size:15px"><b style="font-weight:600">Restore instantly on a new phone</b></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px">
+              <div style="width:34px;height:34px;border-radius:10px;background:rgba(47,187,132,.18);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7.5" stroke="#2FBB84" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div style="font-size:15px"><b style="font-weight:600">Unlimited items &amp; custom icons</b></div>
+            </div>
+          </div>
+
+          <div style="flex:1"></div>
+
+          <!-- plan cards -->
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:15px;padding:14px">
+              <div style="font-size:13px;color:rgba(255,255,255,.6)">Monthly</div>
+              <div style="font-size:22px;font-weight:800;margin-top:4px">$1.99</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5)">per month</div>
+            </div>
+            <div style="flex:1;background:rgba(47,187,132,.14);border:1.5px solid #2FBB84;border-radius:15px;padding:14px;position:relative">
+              <div style="position:absolute;top:-9px;right:12px;font-size:10px;font-weight:800;background:#E8C15A;color:#3A2B00;padding:3px 7px;border-radius:6px">SAVE 37%</div>
+              <div style="font-size:13px;color:rgba(255,255,255,.75)">Yearly</div>
+              <div style="font-size:22px;font-weight:800;margin-top:4px">$14.99</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.55)">$1.25 / month</div>
+            </div>
+          </div>
+          <div style="background:#157A5B;color:#fff;text-align:center;font-size:17px;font-weight:700;padding:16px;border-radius:15px;margin-top:14px;box-shadow:0 10px 24px rgba(21,122,91,.4)">Start 7-day free trial</div>
+          <div style="text-align:center;font-size:12px;color:rgba(255,255,255,.4);margin:14px 0 34px;line-height:1.5">Cancel anytime · Restore purchases<br>The free plan keeps everything on-device forever.</div>
+        </div>
+      </x-import>
+    </figure>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
