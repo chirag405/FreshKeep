@@ -1,0 +1,128 @@
+import { supabase } from '@/lib/supabaseClient';
+import { getDb, type ExpiryItemRow, type LastTimeTaskRow } from '@/db/client';
+import { useAuthStore } from '@/store/authStore';
+
+/**
+ * Cloud sync is a Premium feature: free-tier users' data never leaves the
+ * device. Every function here is a no-op unless the user is signed in AND
+ * flagged premium (see supabase/README.md for how that flag gets set).
+ */
+function syncableUserId(): string | null {
+  const { user, isPremium } = useAuthStore.getState();
+  return user && isPremium ? user.id : null;
+}
+
+export async function pushExpiryItem(row: ExpiryItemRow): Promise<void> {
+  const userId = syncableUserId();
+  if (!userId) return;
+  await supabase.from('expiry_items').upsert({
+    id: row.id,
+    user_id: userId,
+    name: row.name,
+    icon: row.icon,
+    expiry_date: row.expiry_date,
+    added_date: row.added_date,
+    opened_date: row.opened_date,
+    location: row.location,
+    reminder_enabled: Boolean(row.reminder_enabled),
+    reminder_days_before: row.reminder_days_before,
+    updated_at: row.updated_at,
+  });
+}
+
+export async function pushExpiryItemDelete(id: string): Promise<void> {
+  const userId = syncableUserId();
+  if (!userId) return;
+  await supabase.from('expiry_items').delete().eq('id', id).eq('user_id', userId);
+}
+
+export async function pushLastTimeTask(row: LastTimeTaskRow): Promise<void> {
+  const userId = syncableUserId();
+  if (!userId) return;
+  await supabase.from('last_time_tasks').upsert({
+    id: row.id,
+    user_id: userId,
+    name: row.name,
+    icon: row.icon,
+    last_done_date: row.last_done_date,
+    repeat_interval_days: row.repeat_interval_days,
+    reminder_enabled: Boolean(row.reminder_enabled),
+    updated_at: row.updated_at,
+  });
+}
+
+export async function pushLastTimeTaskDelete(id: string): Promise<void> {
+  const userId = syncableUserId();
+  if (!userId) return;
+  await supabase.from('last_time_tasks').delete().eq('id', id).eq('user_id', userId);
+}
+
+type RemoteExpiryRow = Omit<ExpiryItemRow, 'reminder_enabled'> & { reminder_enabled: boolean };
+type RemoteTaskRow = Omit<LastTimeTaskRow, 'reminder_enabled'> & { reminder_enabled: boolean };
+
+/**
+ * Two-way, last-write-wins merge by `updated_at`, run once after sign-in (and
+ * safe to re-run on app foreground). Remote rows newer than the local copy
+ * overwrite it; local rows newer than (or absent from) remote get pushed up.
+ * Known simplification: a delete on one device does not propagate to other
+ * devices in this phase (no tombstones) — acceptable for v1 per the product
+ * spec's "keep it simple" rule; revisit if it becomes a real complaint.
+ */
+export async function pullAndMergeAll(): Promise<void> {
+  const userId = syncableUserId();
+  if (!userId) return;
+  const db = getDb();
+
+  const [{ data: remoteItems }, { data: remoteTasks }] = await Promise.all([
+    supabase.from('expiry_items').select('*').eq('user_id', userId),
+    supabase.from('last_time_tasks').select('*').eq('user_id', userId),
+  ]);
+
+  const remoteItemList = (remoteItems ?? []) as RemoteExpiryRow[];
+  const remoteTaskList = (remoteTasks ?? []) as RemoteTaskRow[];
+
+  for (const r of remoteItemList) {
+    const local = await db.getFirstAsync<ExpiryItemRow>('SELECT * FROM expiry_items WHERE id = ?', [r.id]);
+    if (!local || new Date(r.updated_at) > new Date(local.updated_at)) {
+      await db.runAsync(
+        `INSERT INTO expiry_items (id, name, icon, expiry_date, added_date, opened_date, location, reminder_enabled, reminder_days_before, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon, expiry_date=excluded.expiry_date,
+           added_date=excluded.added_date, opened_date=excluded.opened_date, location=excluded.location,
+           reminder_enabled=excluded.reminder_enabled, reminder_days_before=excluded.reminder_days_before, updated_at=excluded.updated_at`,
+        [r.id, r.name, r.icon, r.expiry_date, r.added_date, r.opened_date, r.location, r.reminder_enabled ? 1 : 0, r.reminder_days_before, r.updated_at],
+      );
+    }
+  }
+
+  for (const r of remoteTaskList) {
+    const local = await db.getFirstAsync<LastTimeTaskRow>('SELECT * FROM last_time_tasks WHERE id = ?', [r.id]);
+    if (!local || new Date(r.updated_at) > new Date(local.updated_at)) {
+      await db.runAsync(
+        `INSERT INTO last_time_tasks (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon, last_done_date=excluded.last_done_date,
+           repeat_interval_days=excluded.repeat_interval_days, reminder_enabled=excluded.reminder_enabled, updated_at=excluded.updated_at`,
+        [r.id, r.name, r.icon, r.last_done_date, r.repeat_interval_days, r.reminder_enabled ? 1 : 0, r.updated_at],
+      );
+    }
+  }
+
+  const remoteItemIds = new Map(remoteItemList.map((r) => [r.id, r]));
+  const localItems = await db.getAllAsync<ExpiryItemRow>('SELECT * FROM expiry_items');
+  for (const local of localItems) {
+    const remote = remoteItemIds.get(local.id);
+    if (!remote || new Date(local.updated_at) > new Date(remote.updated_at)) {
+      await pushExpiryItem(local);
+    }
+  }
+
+  const remoteTaskIds = new Map(remoteTaskList.map((r) => [r.id, r]));
+  const localTasks = await db.getAllAsync<LastTimeTaskRow>('SELECT * FROM last_time_tasks');
+  for (const local of localTasks) {
+    const remote = remoteTaskIds.get(local.id);
+    if (!remote || new Date(local.updated_at) > new Date(remote.updated_at)) {
+      await pushLastTimeTask(local);
+    }
+  }
+}

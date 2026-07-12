@@ -9,6 +9,10 @@ export function daysBetween(from: Date, to: Date): number {
   return Math.round(diff / MS_PER_DAY);
 }
 
+export function nowISODateTime(): string {
+  return new Date().toISOString();
+}
+
 export function todayISODate(): string {
   const d = new Date();
   const y = d.getFullYear();
