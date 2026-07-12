@@ -25,12 +25,18 @@ working, offline, single-device Expo app matching the visual design in
 
 ## Architecture
 
-- **Navigation:** Expo Router (file-based).
-  - `app/(tabs)/expiring.tsx`, `app/(tabs)/last-time.tsx` — S3/S4
-  - `app/item/[id].tsx` — S7 (detail/edit)
+- **Navigation:** Expo Router (file-based), under `src/app/`.
+  - `app/index.tsx` — Home (S3/S4). The Expiring/Last-time switcher in the
+    mockup is an in-page segmented control at the top of one screen, **not**
+    a native bottom tab bar, so this is a single route holding
+    `activeSection` state (`'expiring' | 'lastTime'`) and rendering the
+    matching bucketed list + FAB.
+  - `app/item/[id].tsx` — S7 (detail/edit), `?type=expiry|task` param to
+    disambiguate which repository/store to use.
   - `app/settings.tsx` — S8
   - `app/add.tsx` (modal) — S5
-  - `app/choose-icon.tsx` (modal) — S6
+  - `app/choose-icon.tsx` (modal) — S6, receives the current selection and a
+    callback target via router params.
   - `app/login.tsx`, `app/verify.tsx`, `app/premium.tsx` — route stubs only
     (S1/S2/S9). No auth/billing logic in this phase; they exist so navigation
     paths and Settings entry points are wired for Phase 2/4 to fill in.
