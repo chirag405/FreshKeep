@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# local Claude Code harness state (not part of the app)
+.claude/
