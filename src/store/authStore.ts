@@ -4,6 +4,7 @@ import * as WebBrowser from 'expo-web-browser';
 import type { Session, User } from '@supabase/supabase-js';
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
+import { pullAndMergeAll } from '@/sync';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -29,6 +30,26 @@ async function fetchIsPremium(userId: string): Promise<boolean> {
   return Boolean(data.is_premium);
 }
 
+/**
+ * Applies a freshly-read `isPremium` value and, on the false → true edge
+ * specifically, kicks off a sync so everything the user built up on the free
+ * (local-only) tier gets pushed to Supabase the moment they upgrade — not
+ * only on the next app boot or manual "Sync now" tap. `pullAndMergeAll`
+ * already uploads any local row missing from Supabase, so nothing further
+ * is needed here beyond firing it at the right time.
+ */
+function applyPremiumStatus(
+  set: (partial: Partial<AuthState>) => void,
+  get: () => AuthState,
+  isPremium: boolean,
+): void {
+  const wasPremium = get().isPremium;
+  set({ isPremium });
+  if (isPremium && !wasPremium) {
+    pullAndMergeAll();
+  }
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
   session: null,
@@ -44,13 +65,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const session = data.session ?? null;
     set({ session, user: session?.user ?? null, initialized: true });
     if (session?.user) {
-      set({ isPremium: await fetchIsPremium(session.user.id) });
+      applyPremiumStatus(set, get, await fetchIsPremium(session.user.id));
     }
 
     supabase.auth.onAuthStateChange((_event, newSession) => {
       set({ session: newSession, user: newSession?.user ?? null });
       if (newSession?.user) {
-        fetchIsPremium(newSession.user.id).then((isPremium) => set({ isPremium }));
+        fetchIsPremium(newSession.user.id).then((isPremium) => applyPremiumStatus(set, get, isPremium));
       } else {
         set({ isPremium: false });
       }
@@ -98,7 +119,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshPremiumStatus: async () => {
     const user = get().user;
     if (!user) return;
-    set({ isPremium: await fetchIsPremium(user.id) });
+    applyPremiumStatus(set, get, await fetchIsPremium(user.id));
   },
 
   /**
@@ -116,7 +137,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `user_id=eq.${user.id}` },
-        (payload) => set({ isPremium: Boolean((payload.new as { is_premium?: boolean }).is_premium) }),
+        (payload) => applyPremiumStatus(set, get, Boolean((payload.new as { is_premium?: boolean }).is_premium)),
       )
       .subscribe();
     return () => {
