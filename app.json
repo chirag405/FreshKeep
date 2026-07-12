@@ -8,7 +8,10 @@
     "scheme": "freshkeep",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "FreshKeep can lock the app behind Face ID so only you can see your list."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +37,8 @@
         }
       ],
       "expo-sqlite",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

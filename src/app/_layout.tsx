@@ -4,14 +4,23 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { migrate } from '@/db/client';
 import { colors } from '@/theme/tokens';
+import { initNotifications } from '@/notifications';
+import { useAuthStore } from '@/store/authStore';
+import { pullAndMergeAll } from '@/sync';
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
+  const initAuth = useAuthStore((s) => s.init);
 
   useEffect(() => {
     migrate();
+    initNotifications();
+    initAuth().then(() => {
+      // Fire-and-forget: no-op for free/unauthenticated users (see src/sync).
+      pullAndMergeAll();
+    });
     setReady(true);
-  }, []);
+  }, [initAuth]);
 
   if (!ready) {
     return (
