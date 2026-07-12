@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 let handlerRegistered = false;
+let androidChannelReady = false;
 
 export function initNotifications(): void {
   if (handlerRegistered) return;
@@ -34,7 +35,8 @@ export async function scheduleReminder(params: {
   if (!granted) return null;
   if (params.date.getTime() <= Date.now()) return null;
 
-  if (Platform.OS === 'android') {
+  if (Platform.OS === 'android' && !androidChannelReady) {
+    androidChannelReady = true;
     await Notifications.setNotificationChannelAsync('reminders', {
       name: 'Reminders',
       importance: Notifications.AndroidImportance.DEFAULT,
