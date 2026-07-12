@@ -39,4 +39,8 @@ describe('lastTimeProgress', () => {
     expect(lastTimeProgress(12, 14)).toBe(86);
     expect(lastTimeProgress(32, 90)).toBe(36);
   });
+  it('returns 100 when repeatIntervalDays is 0 or negative (avoids NaN)', () => {
+    expect(lastTimeProgress(0, 0)).toBe(100);
+    expect(lastTimeProgress(5, -1)).toBe(100);
+  });
 });

@@ -20,6 +20,7 @@ export function bucketLastTimeStatus(daysSince: number, repeatIntervalDays: numb
 }
 
 export function lastTimeProgress(daysSince: number, repeatIntervalDays: number): number {
+  if (repeatIntervalDays <= 0) return 100;
   const pct = Math.round((daysSince / repeatIntervalDays) * 100);
   return Math.max(0, Math.min(100, pct));
 }

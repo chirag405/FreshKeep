@@ -1,4 +1,4 @@
-import { daysBetween, formatDaysAgo, formatExpiryCountdown } from '@/lib/dateMath';
+import { daysBetween, formatDaysAgo, formatExpiryCountdown, formatDate, todayISODate } from '@/lib/dateMath';
 
 describe('daysBetween', () => {
   it('returns 0 for the same day', () => {
@@ -37,5 +37,20 @@ describe('formatDaysAgo', () => {
   });
   it('formats singular day', () => {
     expect(formatDaysAgo(1)).toBe('1 day ago');
+  });
+});
+
+describe('formatDate', () => {
+  it('formats across a month/year boundary', () => {
+    expect(formatDate('2026-01-01')).toBe('Thu, 1 January 2026');
+    expect(formatDate('2025-12-31')).toBe('Wed, 31 December 2025');
+  });
+});
+
+describe('todayISODate', () => {
+  it('returns a string matching YYYY-MM-DD built from local date parts', () => {
+    const d = new Date();
+    const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    expect(todayISODate()).toBe(expected);
   });
 });
