@@ -11,6 +11,12 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const ACTIVE_STATUSES = new Set(['active', 'on_trial']);
+// Every status LemonSqueezy documents for a subscription object. Used to
+// fail closed: if `status` is missing or something we don't recognize, we
+// reject the request instead of defaulting to "not premium" — silently
+// revoking a paying customer's access on ambiguous/malformed input would be
+// far worse than a rejected webhook LemonSqueezy will retry.
+const KNOWN_STATUSES = new Set(['active', 'on_trial', 'past_due', 'unpaid', 'cancelled', 'expired', 'paused']);
 
 function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -65,13 +71,29 @@ Deno.serve(async (req) => {
     return new Response('Invalid signature', { status: 401 });
   }
 
-  const payload: LemonSqueezyPayload = JSON.parse(rawBody);
-  const userId = payload.meta.custom_data?.user_id;
+  let payload: LemonSqueezyPayload;
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return new Response('Malformed JSON body', { status: 400 });
+  }
+
+  const userId = payload?.meta?.custom_data?.user_id;
   if (!userId) {
     return new Response('Missing custom_data.user_id', { status: 400 });
   }
 
-  const { status, customer_id, renews_at, variant_name } = payload.data.attributes;
+  const attributes = payload?.data?.attributes;
+  const subscriptionId = payload?.data?.id;
+  if (!attributes || !subscriptionId) {
+    return new Response('Missing data.id or data.attributes', { status: 400 });
+  }
+
+  const { status, customer_id, renews_at, variant_name } = attributes;
+  if (!status || !KNOWN_STATUSES.has(status)) {
+    console.error('Unrecognized subscription status, rejecting webhook', status);
+    return new Response(`Unrecognized status: ${status}`, { status: 400 });
+  }
   const isPremium = ACTIVE_STATUSES.has(status);
 
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -81,7 +103,7 @@ Deno.serve(async (req) => {
     .update({
       is_premium: isPremium,
       lemonsqueezy_customer_id: String(customer_id),
-      subscription_id: payload.data.id,
+      subscription_id: subscriptionId,
       subscription_status: status,
       plan: variant_name,
       renews_at,

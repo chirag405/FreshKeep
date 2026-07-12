@@ -13,15 +13,26 @@ export default function RootLayout() {
   const initAuth = useAuthStore((s) => s.init);
 
   useEffect(() => {
-    migrate();
-    initNotifications();
-    initAuth().then(async () => {
-      // No-op for free/unauthenticated users (see src/sync) — awaited so the
-      // Stack only renders once auth state is actually known, avoiding a
-      // flash of "not signed in" for an already-signed-in Premium user.
-      await pullAndMergeAll();
-      setReady(true);
-    });
+    async function boot() {
+      migrate();
+      initNotifications();
+      try {
+        // Awaited so the Stack only renders once auth state is actually
+        // known, avoiding a flash of "not signed in" for an already-signed-in
+        // Premium user. `pullAndMergeAll` is a no-op for free/unauthenticated
+        // users (see src/sync) and never throws (internally isolated
+        // per-row) — the try/catch here is defense-in-depth so a genuinely
+        // unexpected failure (e.g. initAuth's own network call) still can't
+        // strand the app on the loading spinner forever.
+        await initAuth();
+        await pullAndMergeAll();
+      } catch (error) {
+        console.error('[boot] auth/sync init failed, continuing anyway', error);
+      } finally {
+        setReady(true);
+      }
+    }
+    boot();
   }, [initAuth]);
 
   if (!ready) {

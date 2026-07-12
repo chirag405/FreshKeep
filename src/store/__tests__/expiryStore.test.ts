@@ -3,6 +3,7 @@ jest.mock('@/db/expiryItems');
 import { useExpiryStore, getExpiryBuckets } from '@/store/expiryStore';
 import * as repo from '@/db/expiryItems';
 import type { ExpiryItemRow } from '@/db/client';
+import { todayISODate } from '@/lib/dateMath';
 
 const mockRepo = repo as jest.Mocked<typeof repo>;
 
@@ -52,7 +53,7 @@ describe('useExpiryStore', () => {
 
 describe('getExpiryBuckets', () => {
   it('buckets items relative to today', () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayISODate();
     const buckets = getExpiryBuckets([rowFixture({ expiry_date: today })]);
     expect(buckets.needsAttention).toHaveLength(1);
     expect(buckets.thisWeek).toHaveLength(0);

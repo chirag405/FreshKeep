@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -7,11 +7,12 @@ import { colors, radii, spacing } from '@/theme/tokens';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Toggle } from '@/components/Toggle';
 import { suggestIcon } from '@/lib/iconSuggest';
-import { formatDate, todayISODate } from '@/lib/dateMath';
+import { formatDate, todayISODate, toLocalISODate } from '@/lib/dateMath';
 import { onIconSelected, clearIconListener } from '@/lib/iconSelectionChannel';
 import { onDateScanned, clearScanListener } from '@/lib/ocr/scanResultChannel';
 import { useExpiryStore } from '@/store/expiryStore';
 import { useLastTimeStore } from '@/store/lastTimeStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { scheduleReminder } from '@/notifications';
 
 const RECENT_EXPIRY = ['Milk', 'Bread', 'Eggs', 'Paracetamol'];
@@ -20,7 +21,7 @@ const RECENT_TASKS = ['Changed bedsheets', 'Replaced toothbrush', 'Cleaned filte
 function addDays(iso: string, days: number): string {
   const d = new Date(`${iso}T00:00:00`);
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return toLocalISODate(d);
 }
 
 export default function Add() {
@@ -35,9 +36,11 @@ export default function Add() {
   const [repeatDays, setRepeatDays] = useState<number | null>(null);
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const addExpiryItem = useExpiryStore((s) => s.addItem);
   const addTask = useLastTimeStore((s) => s.addTask);
+  const defaultReminderDaysBefore = useSettingsStore((s) => s.defaultReminderDaysBefore);
 
   useEffect(() => {
     onIconSelected((picked) => {
@@ -52,50 +55,77 @@ export default function Add() {
     return () => clearScanListener();
   }, []);
 
+  const settingsLoaded = useSettingsStore((s) => s.loaded);
+  const loadSettings = useSettingsStore((s) => s.load);
+  useEffect(() => {
+    // Add is reachable directly from Home without ever visiting Settings, so
+    // the settings store may not be hydrated yet — make sure it is before
+    // relying on defaultReminderDaysBefore below.
+    if (!settingsLoaded) loadSettings();
+  }, [settingsLoaded, loadSettings]);
+
   const recentChips = section === 'expiry' ? RECENT_EXPIRY : RECENT_TASKS;
   const displayIcon = !iconTouched && name.trim().length > 0 ? suggestIcon(name, section) : icon;
 
   const save = async () => {
+    if (isSaving) return; // guards against duplicate inserts from a fast double-tap
     const trimmed = name.trim();
     if (!trimmed) return;
 
-    if (section === 'expiry') {
-      const row = await addExpiryItem({
-        name: trimmed,
-        icon: displayIcon,
-        expiryDate,
-        reminderEnabled,
-        reminderDaysBefore: 2,
-      });
-      if (reminderEnabled) {
-        const triggerDate = new Date(`${expiryDate}T09:00:00`);
-        triggerDate.setDate(triggerDate.getDate() - 2);
-        await scheduleReminder({
-          id: `expiry-${row.id}`,
-          title: 'FreshKeep',
-          body: `${displayIcon} ${trimmed} expires soon`,
-          date: triggerDate,
+    setIsSaving(true);
+    try {
+      if (section === 'expiry') {
+        const row = await addExpiryItem({
+          name: trimmed,
+          icon: displayIcon,
+          expiryDate,
+          reminderEnabled,
+          reminderDaysBefore: defaultReminderDaysBefore,
         });
-      }
-    } else {
-      const row = await addTask({
-        name: trimmed,
-        icon: displayIcon,
-        repeatIntervalDays: repeatDays,
-        reminderEnabled,
-      });
-      if (reminderEnabled && row.repeat_interval_days) {
-        const triggerDate = new Date(`${row.last_done_date}T09:00:00`);
-        triggerDate.setDate(triggerDate.getDate() + row.repeat_interval_days);
-        await scheduleReminder({
-          id: `lasttime-${row.id}`,
-          title: 'FreshKeep',
-          body: `${displayIcon} ${row.repeat_interval_days} days since you ${trimmed.toLowerCase()}`,
-          date: triggerDate,
+        if (reminderEnabled) {
+          const triggerDate = new Date(`${expiryDate}T09:00:00`);
+          triggerDate.setDate(triggerDate.getDate() - defaultReminderDaysBefore);
+          const scheduledId = await scheduleReminder({
+            id: `expiry-${row.id}`,
+            title: 'FreshKeep',
+            body: `${displayIcon} ${trimmed} expires soon`,
+            date: triggerDate,
+          });
+          if (!scheduledId) {
+            Alert.alert(
+              'Reminder not set',
+              `The reminder date is already in the past (or notifications aren't allowed), so no alert will fire. ${trimmed} was still saved.`,
+            );
+          }
+        }
+      } else {
+        const row = await addTask({
+          name: trimmed,
+          icon: displayIcon,
+          repeatIntervalDays: repeatDays,
+          reminderEnabled,
         });
+        if (reminderEnabled && row.repeat_interval_days) {
+          const triggerDate = new Date(`${row.last_done_date}T09:00:00`);
+          triggerDate.setDate(triggerDate.getDate() + row.repeat_interval_days);
+          const scheduledId = await scheduleReminder({
+            id: `lasttime-${row.id}`,
+            title: 'FreshKeep',
+            body: `${displayIcon} ${row.repeat_interval_days} days since you ${trimmed.toLowerCase()}`,
+            date: triggerDate,
+          });
+          if (!scheduledId) {
+            Alert.alert(
+              'Reminder not set',
+              `The reminder date is already in the past (or notifications aren't allowed), so no alert will fire. ${trimmed} was still saved.`,
+            );
+          }
+        }
       }
+      router.back();
+    } finally {
+      setIsSaving(false);
     }
-    router.back();
   };
 
   return (
@@ -105,7 +135,9 @@ export default function Add() {
         <View style={styles.headerRow}>
           <Text style={styles.link} onPress={() => router.back()}>Cancel</Text>
           <Text style={styles.title}>{section === 'expiry' ? 'New item' : 'New task'}</Text>
-          <Text style={[styles.link, styles.linkStrong]} onPress={save}>Save</Text>
+          <Text style={[styles.link, styles.linkStrong, isSaving && styles.linkDisabled]} onPress={isSaving ? undefined : save}>
+            {isSaving ? 'Saving…' : 'Save'}
+          </Text>
         </View>
 
         <SegmentedControl
@@ -173,7 +205,7 @@ export default function Add() {
                   display={Platform.OS === 'ios' ? 'inline' : 'default'}
                   onChange={(_, date) => {
                     setShowDatePicker(Platform.OS === 'ios');
-                    if (date) setExpiryDate(date.toISOString().slice(0, 10));
+                    if (date) setExpiryDate(toLocalISODate(date));
                   }}
                 />
               )}
@@ -195,14 +227,18 @@ export default function Add() {
             <View>
               <Text style={styles.reminderTitle}>Remind me</Text>
               <Text style={styles.reminderSubtitle}>
-                {section === 'expiry' ? '2 days before it expires' : 'when the repeat interval is reached'}
+                {section === 'expiry'
+                  ? `${defaultReminderDaysBefore} day${defaultReminderDaysBefore === 1 ? '' : 's'} before it expires`
+                  : 'when the repeat interval is reached'}
               </Text>
             </View>
             <Toggle value={reminderEnabled} onValueChange={setReminderEnabled} />
           </View>
 
-          <Pressable style={styles.saveButton} onPress={save}>
-            <Text style={styles.saveButtonText}>{section === 'expiry' ? 'Add to FreshKeep' : 'Add task'}</Text>
+          <Pressable style={styles.saveButton} onPress={save} disabled={isSaving}>
+            <Text style={styles.saveButtonText}>
+              {isSaving ? 'Saving…' : section === 'expiry' ? 'Add to FreshKeep' : 'Add task'}
+            </Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -217,6 +253,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   link: { fontSize: 15, color: colors.primary },
   linkStrong: { fontWeight: '600' },
+  linkDisabled: { opacity: 0.5 },
   title: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
   fieldLabel: { fontSize: 11.5, fontWeight: '700', letterSpacing: 1, color: colors.textFaint, marginBottom: 8, marginTop: 20 },
   nameRow: { flexDirection: 'row', gap: 10, alignItems: 'stretch' },

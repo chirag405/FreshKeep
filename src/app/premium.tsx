@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
 import { colors } from '@/theme/tokens';
 import { useAuthStore } from '@/store/authStore';
 import { buildCheckoutUrl, isLemonSqueezyConfigured, type BillingPlan } from '@/lib/lemonsqueezy';
@@ -15,7 +16,10 @@ const BENEFITS = [
 
 export default function Premium() {
   const router = useRouter();
-  const { isPremium, user, refreshPremiumStatus, subscribeToPremiumChanges } = useAuthStore();
+  const isPremium = useAuthStore((s) => s.isPremium);
+  const user = useAuthStore((s) => s.user);
+  const refreshPremiumStatus = useAuthStore((s) => s.refreshPremiumStatus);
+  const subscribeToPremiumChanges = useAuthStore((s) => s.subscribeToPremiumChanges);
   const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('yearly');
   const [checkingOut, setCheckingOut] = useState(false);
 
@@ -29,7 +33,8 @@ export default function Premium() {
       router.push('/login');
       return;
     }
-    const checkoutUrl = buildCheckoutUrl(selectedPlan, user.id, user.email);
+    const redirectUrl = AuthSession.makeRedirectUri({ path: 'premium' });
+    const checkoutUrl = buildCheckoutUrl(selectedPlan, user.id, user.email ?? null, redirectUrl);
     if (!checkoutUrl) {
       Alert.alert(
         'Billing not configured yet',
@@ -38,12 +43,21 @@ export default function Premium() {
       return;
     }
     setCheckingOut(true);
-    await WebBrowser.openBrowserAsync(checkoutUrl);
-    // The webhook updates profiles server-side; the realtime subscription above
-    // will pick it up automatically, but refresh once too in case it landed
-    // just before the subscription connected.
-    await refreshPremiumStatus();
-    setCheckingOut(false);
+    try {
+      // openAuthSessionAsync (not openBrowserAsync) so the browser
+      // auto-dismisses when LemonSqueezy redirects back to redirectUrl after
+      // a successful purchase, instead of stranding the user on
+      // LemonSqueezy's page with no way back into the app.
+      await WebBrowser.openAuthSessionAsync(checkoutUrl, redirectUrl);
+      // The webhook updates profiles server-side; the realtime subscription
+      // above will pick it up automatically, but refresh once too in case it
+      // landed just before the subscription connected.
+      await refreshPremiumStatus();
+    } catch (error) {
+      console.error('[premium] checkout failed', error);
+    } finally {
+      setCheckingOut(false);
+    }
   };
 
   return (

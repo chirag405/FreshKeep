@@ -13,12 +13,22 @@ export function nowISODateTime(): string {
   return new Date().toISOString();
 }
 
-export function todayISODate(): string {
-  const d = new Date();
+/**
+ * Formats a Date as YYYY-MM-DD using its LOCAL calendar date — never use
+ * `.toISOString().slice(0, 10)` for this, which converts to UTC first and
+ * is off by one day for any timezone ahead of UTC (including IST, this
+ * app's own default) whenever the local time is late enough to have
+ * already rolled to the next UTC day.
+ */
+export function toLocalISODate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
+}
+
+export function todayISODate(): string {
+  return toLocalISODate(new Date());
 }
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

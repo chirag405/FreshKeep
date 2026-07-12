@@ -16,7 +16,9 @@ export default function Settings() {
     notificationSoundEnabled, setNotificationSoundEnabled,
     appLockEnabled, setAppLockEnabled,
   } = useSettingsStore();
-  const { user, isPremium, signOut } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const isPremium = useAuthStore((s) => s.isPremium);
+  const signOut = useAuthStore((s) => s.signOut);
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { if (!loaded) load(); }, [loaded, load]);
@@ -34,11 +36,20 @@ export default function Settings() {
   };
 
   const accountLabel = user?.phone ? `+${user.phone}` : user?.email ?? null;
+  // A phone number has no meaningful "initial" letter — show a generic
+  // avatar glyph for phone accounts, and the first letter for email ones.
+  const avatarGlyph = user?.email ? user.email[0].toUpperCase() : '👤';
 
   const onSyncNow = async () => {
     setSyncing(true);
-    await pullAndMergeAll();
-    setSyncing(false);
+    try {
+      await pullAndMergeAll();
+    } catch (error) {
+      console.error('[settings] manual sync failed', error);
+      Alert.alert('Sync failed', 'Check your connection and try again.');
+    } finally {
+      setSyncing(false);
+    }
   };
 
   return (
@@ -49,7 +60,7 @@ export default function Settings() {
       <Text style={styles.title}>Settings</Text>
 
       <View style={[styles.card, styles.rowCard]}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>{accountLabel ? accountLabel[accountLabel.length - 1] : '—'}</Text></View>
+        <View style={styles.avatar}><Text style={styles.avatarText}>{accountLabel ? avatarGlyph : '—'}</Text></View>
         <View style={{ flex: 1 }}>
           <Text style={styles.rowTitle}>{accountLabel ?? 'Not signed in'}</Text>
           <Text style={styles.rowSubtitle}>{user ? `Signed in · ${isPremium ? 'Premium' : 'Free plan'}` : 'Sign in to save your list and sync'}</Text>

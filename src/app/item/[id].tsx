@@ -37,7 +37,10 @@ export default function ItemDetail() {
       if (value) {
         const triggerDate = new Date(`${item.expiry_date}T09:00:00`);
         triggerDate.setDate(triggerDate.getDate() - item.reminder_days_before);
-        await scheduleReminder({ id: `expiry-${item.id}`, title: 'FreshKeep', body: `${item.icon} ${item.name} expires soon`, date: triggerDate });
+        const scheduledId = await scheduleReminder({ id: `expiry-${item.id}`, title: 'FreshKeep', body: `${item.icon} ${item.name} expires soon`, date: triggerDate });
+        if (!scheduledId) {
+          Alert.alert('Reminder not set', "That reminder date is already in the past (or notifications aren't allowed), so no alert will fire.");
+        }
       } else {
         await cancelReminder(`expiry-${item.id}`);
       }
@@ -98,12 +101,15 @@ export default function ItemDetail() {
     if (value && task.repeat_interval_days) {
       const triggerDate = new Date(`${task.last_done_date}T09:00:00`);
       triggerDate.setDate(triggerDate.getDate() + task.repeat_interval_days);
-      await scheduleReminder({
+      const scheduledId = await scheduleReminder({
         id: `lasttime-${task.id}`,
         title: 'FreshKeep',
         body: `${task.icon} ${task.repeat_interval_days} days since you ${task.name.toLowerCase()}`,
         date: triggerDate,
       });
+      if (!scheduledId) {
+        Alert.alert('Reminder not set', "That reminder date is already in the past (or notifications aren't allowed), so no alert will fire.");
+      }
     } else if (!value) {
       await cancelReminder(`lasttime-${task.id}`);
     }

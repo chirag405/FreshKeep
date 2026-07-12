@@ -17,6 +17,13 @@ function toIso(year: number, month: number, day: number): string | null {
   if (month < 1 || month > 12) return null;
   if (day < 1 || day > 31) return null;
   const fullYear = year < 100 ? 2000 + year : year;
+  // Reject calendar-invalid combinations (31 Apr, 30 Feb, 29 Feb on a
+  // non-leap year, ...) rather than silently emitting a date that a later
+  // `new Date(...)` would roll forward with no indication anything was wrong.
+  const d = new Date(fullYear, month - 1, day);
+  if (d.getFullYear() !== fullYear || d.getMonth() !== month - 1 || d.getDate() !== day) {
+    return null;
+  }
   return `${fullYear}-${pad(month)}-${pad(day)}`;
 }
 

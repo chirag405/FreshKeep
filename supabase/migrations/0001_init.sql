@@ -52,11 +52,22 @@ create policy "Users manage their own last-time tasks" on public.last_time_tasks
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- Read-only for regular users, deliberately — NOT "for all". A profile row's
+-- own writes (is_premium, subscription_status, etc.) must only ever come
+-- from the LemonSqueezy webhook, which uses the service role key and so
+-- bypasses RLS entirely. A "for all" policy here (using = with check on
+-- user_id only, not a column allowlist) would let any signed-in user run
+-- `update profiles set is_premium = true where user_id = auth.uid()`
+-- directly and grant themselves Premium for free — Postgres RLS restricts
+-- *which row* a policy applies to, not *which columns* within it. The
+-- profile row itself is created by the handle_new_user() trigger below
+-- (security definer, also bypasses RLS), so regular users never need
+-- insert/update/delete grants on this table at all.
 drop policy if exists "Users manage their own profile" on public.profiles;
-create policy "Users manage their own profile" on public.profiles
-  for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+drop policy if exists "Users can read their own profile" on public.profiles;
+create policy "Users can read their own profile" on public.profiles
+  for select
+  using (auth.uid() = user_id);
 
 -- Auto-create a profile row (defaulting to non-premium) whenever a new auth user signs up.
 create or replace function public.handle_new_user()

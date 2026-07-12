@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
@@ -61,16 +61,20 @@ export default function Scan() {
 
   if (candidates) {
     return (
-      <View style={[styles.screen, styles.centered]}>
-        <Text style={styles.resultTitle}>Which date is it?</Text>
-        {candidates.map((c) => (
-          <Pressable key={c.iso} style={styles.candidateCard} onPress={() => selectCandidate(c)}>
-            <Text style={styles.candidateDate}>{formatDate(c.iso)}</Text>
-            <Text style={styles.candidateRaw}>found: &quot;{c.raw}&quot;{c.confidence === 'low' ? ' · double-check this one' : ''}</Text>
-          </Pressable>
-        ))}
-        <Text style={styles.manualLink} onPress={() => setCandidates(null)}>Retake photo</Text>
-        <Text style={styles.manualLink} onPress={() => router.back()}>Enter manually instead</Text>
+      <View style={styles.screen}>
+        <ScrollView contentContainerStyle={styles.resultsScroll}>
+          <Text style={styles.resultTitle}>Which date is it?</Text>
+          {candidates.map((c) => (
+            <Pressable key={c.iso} style={styles.candidateCard} onPress={() => selectCandidate(c)}>
+              <Text style={styles.candidateDate}>{formatDate(c.iso)}</Text>
+              <Text style={styles.candidateRaw}>found: &quot;{c.raw}&quot;{c.confidence === 'low' ? ' · double-check this one' : ''}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+        <View style={styles.resultsFooter}>
+          <Text style={styles.manualLink} onPress={() => setCandidates(null)}>Retake photo</Text>
+          <Text style={styles.manualLink} onPress={() => router.back()}>Enter manually instead</Text>
+        </View>
       </View>
     );
   }
@@ -108,6 +112,8 @@ const styles = StyleSheet.create({
   controlsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
   shutter: { width: 72, height: 72, borderRadius: 999, borderWidth: 4, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   shutterInner: { width: 56, height: 56, borderRadius: 999, backgroundColor: '#fff' },
+  resultsScroll: { alignItems: 'center', padding: 24, paddingTop: 70, gap: 10 },
+  resultsFooter: { alignItems: 'center', paddingBottom: 30, gap: 4 },
   resultTitle: { color: colors.textPrimary, fontSize: 20, fontWeight: '800', marginBottom: 6 },
   candidateCard: { backgroundColor: colors.card, borderRadius: radii.md + 2, padding: 16, width: '100%' },
   candidateDate: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },

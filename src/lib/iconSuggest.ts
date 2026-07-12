@@ -32,7 +32,7 @@ const KEYWORD_MAP: [RegExp, string][] = [
   [/first aid/, '🩺'],
   [/water/, '💧'],
   [/bedsheet|sheets|mattress|bed/, '🛏️'],
-  [/filter|ac\b|fan|vent/, '🌀'],
+  [/filter|\bac\b|fan|vent/, '🌀'],
   [/tissue|toilet paper|napkin/, '🧻'],
   [/plant|water.*plant/, '🪴'],
   [/battery|batteries/, '🔋'],

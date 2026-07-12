@@ -26,4 +26,7 @@ describe('suggestIcon', () => {
     expect(suggestIcon('Spare keys', 'lastTime')).toBe('🔑');
     expect(suggestIcon('Vacuum the carpet', 'lastTime')).toBe('🧹');
   });
+  it('does not false-positive-match "ac" inside an unrelated word', () => {
+    expect(suggestIcon('Zodiac calendar', 'lastTime')).toBe('📝');
+  });
 });

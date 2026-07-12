@@ -50,4 +50,13 @@ describe('extractDateCandidates', () => {
   it('ignores an invalid month number', () => {
     expect(extractDateCandidates('13/45/2026')).toEqual([]);
   });
+
+  it('rejects a calendar-invalid day for a 30-day month', () => {
+    expect(extractDateCandidates('31 Apr 2026')).toEqual([]);
+  });
+
+  it('rejects Feb 29 on a non-leap year but accepts it on a leap year', () => {
+    expect(extractDateCandidates('29 Feb 2026')).toEqual([]);
+    expect(extractDateCandidates('29 Feb 2028')[0]).toMatchObject({ iso: '2028-02-29' });
+  });
 });
