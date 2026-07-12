@@ -23,6 +23,13 @@ export type LastTimeTaskRow = {
   updated_at: string; // ISO datetime, used for last-write-wins sync merges
 };
 
+export type AppSettingsRow = {
+  id: number;
+  default_reminder_days_before: number;
+  notification_sound_enabled: number;
+  app_lock_enabled: number;
+};
+
 const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS expiry_items (
   id TEXT PRIMARY KEY NOT NULL,
@@ -45,6 +52,12 @@ CREATE TABLE IF NOT EXISTS last_time_tasks (
   reminder_enabled INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
+CREATE TABLE IF NOT EXISTS app_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  default_reminder_days_before INTEGER NOT NULL DEFAULT 2,
+  notification_sound_enabled INTEGER NOT NULL DEFAULT 1,
+  app_lock_enabled INTEGER NOT NULL DEFAULT 0
+);
 `;
 
 let db: SQLite.SQLiteDatabase | null = null;
@@ -61,5 +74,7 @@ export function setTestDb(next: SQLite.SQLiteDatabase | null): void {
 }
 
 export function migrate(): void {
-  getDb().execSync(SCHEMA_SQL);
+  const database = getDb();
+  database.execSync(SCHEMA_SQL);
+  database.execSync('INSERT OR IGNORE INTO app_settings (id) VALUES (1);');
 }
