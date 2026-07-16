@@ -37,6 +37,10 @@ Open the SQL Editor in your Supabase project dashboard and run, in order:
    signed-in user can only see their own rows.
 2. `supabase/migrations/0002_billing.sql` — adds LemonSqueezy subscription
    columns to `profiles`.
+3. `supabase/migrations/0003_last_time_task_notes.sql` — adds an optional
+   `note` column to `last_time_tasks`.
+4. `supabase/migrations/0004_expiry_item_notes.sql` — adds an optional
+   `note` column to `expiry_items`.
 
 ## 4. Enable Google sign-in
 

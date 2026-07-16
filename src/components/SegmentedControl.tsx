@@ -1,6 +1,13 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radii } from '@/theme/tokens';
+import { colors } from '@/theme/tokens';
 
+/**
+ * Design-exact segmented pill from the Claude Design handoff (S3/S5): tan
+ * track, 3px inset, white active segment with a soft shadow. Deliberately
+ * plain StyleSheet (no NativeWind classes) so it renders identically
+ * everywhere — including inside the bottom sheet — with zero dependency on
+ * the Tailwind compile pipeline.
+ */
 export function SegmentedControl<T extends string>({
   options,
   value,
@@ -32,15 +39,15 @@ const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
     backgroundColor: colors.chipTrackBg,
-    borderRadius: radii.md,
+    borderRadius: 12,
     padding: 3,
     gap: 3,
   },
   segment: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: radii.sm + 1,
+    paddingVertical: 9,
+    borderRadius: 9,
   },
   segmentActive: {
     backgroundColor: colors.chipActiveBg,
@@ -48,6 +55,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.07,
     shadowRadius: 2,
     shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
   },
   label: {
     fontSize: 14,

@@ -7,9 +7,9 @@ export type ExpiryItemRow = {
   expiry_date: string; // ISO date string, e.g. "2026-07-14"
   added_date: string;
   opened_date: string | null;
-  location: string | null;
   reminder_enabled: number; // 0 | 1
   reminder_days_before: number;
+  note: string | null;
   updated_at: string; // ISO datetime, used for last-write-wins sync merges
 };
 
@@ -20,6 +20,7 @@ export type LastTimeTaskRow = {
   last_done_date: string;
   repeat_interval_days: number | null;
   reminder_enabled: number; // 0 | 1
+  note: string | null;
   updated_at: string; // ISO datetime, used for last-write-wins sync merges
 };
 
@@ -38,9 +39,9 @@ CREATE TABLE IF NOT EXISTS expiry_items (
   expiry_date TEXT NOT NULL,
   added_date TEXT NOT NULL,
   opened_date TEXT,
-  location TEXT,
   reminder_enabled INTEGER NOT NULL DEFAULT 0,
   reminder_days_before INTEGER NOT NULL DEFAULT 2,
+  note TEXT,
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 CREATE TABLE IF NOT EXISTS last_time_tasks (
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS last_time_tasks (
   last_done_date TEXT NOT NULL,
   repeat_interval_days INTEGER,
   reminder_enabled INTEGER NOT NULL DEFAULT 0,
+  note TEXT,
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 CREATE TABLE IF NOT EXISTS app_settings (
@@ -77,4 +79,18 @@ export function migrate(): void {
   const database = getDb();
   database.execSync(SCHEMA_SQL);
   database.execSync('INSERT OR IGNORE INTO app_settings (id) VALUES (1);');
+  ensureColumn(database, 'last_time_tasks', 'note', 'TEXT');
+  ensureColumn(database, 'expiry_items', 'note', 'TEXT');
+}
+
+/**
+ * Additive, idempotent column migration for installs that created their
+ * SQLite file before a column existed in SCHEMA_SQL — `CREATE TABLE IF NOT
+ * EXISTS` is a no-op on those, so new columns need this instead.
+ */
+function ensureColumn(database: SQLite.SQLiteDatabase, table: string, column: string, type: string): void {
+  const columns = database.getAllSync<{ name: string }>(`PRAGMA table_info(${table})`);
+  if (!columns.some((c) => c.name === column)) {
+    database.execSync(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+  }
 }

@@ -23,9 +23,9 @@ export async function pushExpiryItem(row: ExpiryItemRow): Promise<void> {
     expiry_date: row.expiry_date,
     added_date: row.added_date,
     opened_date: row.opened_date,
-    location: row.location,
     reminder_enabled: Boolean(row.reminder_enabled),
     reminder_days_before: row.reminder_days_before,
+    note: row.note,
     updated_at: row.updated_at,
   });
   if (error) console.error('[sync] failed to push expiry item', row.id, error.message);
@@ -49,6 +49,7 @@ export async function pushLastTimeTask(row: LastTimeTaskRow): Promise<void> {
     last_done_date: row.last_done_date,
     repeat_interval_days: row.repeat_interval_days,
     reminder_enabled: Boolean(row.reminder_enabled),
+    note: row.note,
     updated_at: row.updated_at,
   });
   if (error) console.error('[sync] failed to push last-time task', row.id, error.message);
@@ -68,12 +69,12 @@ async function mergeRemoteExpiryItem(db: ReturnType<typeof getDb>, r: RemoteExpi
   const local = await db.getFirstAsync<ExpiryItemRow>('SELECT * FROM expiry_items WHERE id = ?', [r.id]);
   if (!local || new Date(r.updated_at) > new Date(local.updated_at)) {
     await db.runAsync(
-      `INSERT INTO expiry_items (id, name, icon, expiry_date, added_date, opened_date, location, reminder_enabled, reminder_days_before, updated_at)
+      `INSERT INTO expiry_items (id, name, icon, expiry_date, added_date, opened_date, reminder_enabled, reminder_days_before, note, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon, expiry_date=excluded.expiry_date,
-         added_date=excluded.added_date, opened_date=excluded.opened_date, location=excluded.location,
-         reminder_enabled=excluded.reminder_enabled, reminder_days_before=excluded.reminder_days_before, updated_at=excluded.updated_at`,
-      [r.id, r.name, r.icon, r.expiry_date, r.added_date, r.opened_date, r.location, r.reminder_enabled ? 1 : 0, r.reminder_days_before, r.updated_at],
+         added_date=excluded.added_date, opened_date=excluded.opened_date,
+         reminder_enabled=excluded.reminder_enabled, reminder_days_before=excluded.reminder_days_before, note=excluded.note, updated_at=excluded.updated_at`,
+      [r.id, r.name, r.icon, r.expiry_date, r.added_date, r.opened_date, r.reminder_enabled ? 1 : 0, r.reminder_days_before, r.note, r.updated_at],
     );
   }
 }
@@ -82,11 +83,11 @@ async function mergeRemoteLastTimeTask(db: ReturnType<typeof getDb>, r: RemoteTa
   const local = await db.getFirstAsync<LastTimeTaskRow>('SELECT * FROM last_time_tasks WHERE id = ?', [r.id]);
   if (!local || new Date(r.updated_at) > new Date(local.updated_at)) {
     await db.runAsync(
-      `INSERT INTO last_time_tasks (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO last_time_tasks (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, note, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon, last_done_date=excluded.last_done_date,
-         repeat_interval_days=excluded.repeat_interval_days, reminder_enabled=excluded.reminder_enabled, updated_at=excluded.updated_at`,
-      [r.id, r.name, r.icon, r.last_done_date, r.repeat_interval_days, r.reminder_enabled ? 1 : 0, r.updated_at],
+         repeat_interval_days=excluded.repeat_interval_days, reminder_enabled=excluded.reminder_enabled, note=excluded.note, updated_at=excluded.updated_at`,
+      [r.id, r.name, r.icon, r.last_done_date, r.repeat_interval_days, r.reminder_enabled ? 1 : 0, r.note, r.updated_at],
     );
   }
 }

@@ -14,9 +14,9 @@ const rowFixture = (overrides: Partial<ExpiryItemRow>): ExpiryItemRow => ({
   expiry_date: '2026-07-14',
   added_date: '2026-07-06',
   opened_date: null,
-  location: 'Fridge',
   reminder_enabled: 0,
   reminder_days_before: 2,
+  note: null,
   updated_at: '2026-07-06T00:00:00.000Z',
   ...overrides,
 });

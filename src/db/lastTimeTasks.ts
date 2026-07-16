@@ -9,6 +9,7 @@ export type NewLastTimeTask = {
   lastDoneDate?: string;
   repeatIntervalDays?: number | null;
   reminderEnabled?: boolean;
+  note?: string | null;
 };
 
 export async function listLastTimeTasks(): Promise<LastTimeTaskRow[]> {
@@ -23,13 +24,14 @@ export async function insertLastTimeTask(input: NewLastTimeTask): Promise<LastTi
     last_done_date: input.lastDoneDate ?? todayISODate(),
     repeat_interval_days: input.repeatIntervalDays ?? null,
     reminder_enabled: input.reminderEnabled ? 1 : 0,
+    note: input.note ?? null,
     updated_at: nowISODateTime(),
   };
   await getDb().runAsync(
     `INSERT INTO last_time_tasks
-      (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [row.id, row.name, row.icon, row.last_done_date, row.repeat_interval_days, row.reminder_enabled, row.updated_at],
+      (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, note, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [row.id, row.name, row.icon, row.last_done_date, row.repeat_interval_days, row.reminder_enabled, row.note, row.updated_at],
   );
   void pushLastTimeTask(row);
   return row;
@@ -43,6 +45,7 @@ export async function updateLastTimeTask(id: string, patch: Partial<NewLastTimeT
   if (patch.lastDoneDate !== undefined) { fields.push('last_done_date = ?'); values.push(patch.lastDoneDate); }
   if (patch.repeatIntervalDays !== undefined) { fields.push('repeat_interval_days = ?'); values.push(patch.repeatIntervalDays); }
   if (patch.reminderEnabled !== undefined) { fields.push('reminder_enabled = ?'); values.push(patch.reminderEnabled ? 1 : 0); }
+  if (patch.note !== undefined) { fields.push('note = ?'); values.push(patch.note); }
   if (fields.length === 0) return;
   const updatedAt = nowISODateTime();
   fields.push('updated_at = ?');

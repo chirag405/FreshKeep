@@ -29,7 +29,7 @@ export function IconTile({
 const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
-    gap: 4,
+    gap: 3,
   },
   tile: {
     width: '100%',
@@ -48,10 +48,10 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   icon: {
-    fontSize: 22,
+    fontSize: 20,
   },
   label: {
-    fontSize: 10,
+    fontSize: 9,
     color: colors.textMuted,
     textAlign: 'center',
   },

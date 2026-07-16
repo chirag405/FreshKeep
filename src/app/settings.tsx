@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as LocalAuthentication from 'expo-local-authentication';
 
-import { colors, radii } from '@/theme/tokens';
-import { Toggle } from '@/components/Toggle';
+import { colors, radii, shadow } from '@/theme/tokens';
+import { BackLink } from '@/components/BackLink';
+import { Switch } from '@/components/ui/switch';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useAuthStore } from '@/store/authStore';
 import { pullAndMergeAll } from '@/sync';
 
 export default function Settings() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
     loaded, load, defaultReminderDaysBefore, setDefaultReminderDaysBefore,
     notificationSoundEnabled, setNotificationSoundEnabled,
@@ -51,9 +54,9 @@ export default function Settings() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 30 }}>
-      <View style={styles.headerRow}>
-        <Text style={styles.backLink} onPress={() => router.back()}>‹ FreshKeep</Text>
+    <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: insets.bottom + 30 }}>
+      <View style={[styles.headerRow, { paddingTop: insets.top + 12 }]}>
+        <BackLink label="FreshKeep" onPress={() => router.back()} />
       </View>
       <Text style={styles.title}>Settings</Text>
 
@@ -87,7 +90,7 @@ export default function Settings() {
             <Text style={styles.premiumBadge}>PREMIUM</Text>
           </View>
           <Text style={styles.premiumCta} onPress={() => router.push(user ? '/premium' : '/login')}>
-            {user ? 'Upgrade' : 'Sign in to upgrade'}
+            {user ? 'Upgrade — $1.99/mo' : 'Sign in to upgrade'}
           </Text>
         </View>
       )}
@@ -109,7 +112,7 @@ export default function Settings() {
         <View style={styles.divider} />
         <View style={styles.rowBetween}>
           <Text style={styles.rowTitle}>Notification sound</Text>
-          <Toggle value={notificationSoundEnabled} onValueChange={setNotificationSoundEnabled} />
+          <Switch checked={notificationSoundEnabled} onCheckedChange={setNotificationSoundEnabled} />
         </View>
       </View>
 
@@ -117,8 +120,13 @@ export default function Settings() {
       <View style={styles.card}>
         <View style={styles.rowBetween}>
           <Text style={styles.rowTitle}>🔒  Require biometrics to open</Text>
-          <Toggle value={appLockEnabled} onValueChange={onToggleAppLock} />
+          <Switch checked={appLockEnabled} onCheckedChange={onToggleAppLock} />
         </View>
+      </View>
+
+      <Text style={styles.sectionLabel}>HELP</Text>
+      <View style={styles.card}>
+        <Text style={styles.rowTitle} onPress={() => router.push('/how-to')}>📖  How FreshKeep works</Text>
       </View>
       <Text style={styles.footnote}>
         On the free plan everything stays on this device. Premium encrypts a copy to the cloud so you can restore it on any device.
@@ -131,10 +139,9 @@ export default function Settings() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.screenBg, paddingHorizontal: 16 },
-  headerRow: { paddingTop: 56, paddingBottom: 6 },
-  backLink: { fontSize: 16, color: colors.primary },
+  headerRow: { paddingBottom: 6 },
   title: { fontSize: 30, fontWeight: '800', letterSpacing: -0.8, color: colors.textPrimary, marginBottom: 14 },
-  card: { backgroundColor: colors.card, borderRadius: radii.md + 4, padding: 16 },
+  card: { backgroundColor: colors.card, borderRadius: radii.md + 4, padding: 16, ...shadow.card },
   rowCard: { flexDirection: 'row', alignItems: 'center', gap: 13 },
   avatar: { width: 46, height: 46, borderRadius: 999, backgroundColor: colors.primaryDark, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#fff', fontWeight: '700' },

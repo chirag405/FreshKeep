@@ -13,6 +13,7 @@ const rowFixture = (overrides: Partial<LastTimeTaskRow>): LastTimeTaskRow => ({
   last_done_date: '2026-06-01',
   repeat_interval_days: 30,
   reminder_enabled: 0,
+  note: null,
   updated_at: '2026-06-01T00:00:00.000Z',
   ...overrides,
 });

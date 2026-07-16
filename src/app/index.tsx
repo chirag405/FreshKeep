@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing } from '@/theme/tokens';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Fab } from '@/components/Fab';
+import { EmptyState } from '@/components/EmptyState';
 import { ExpiryItemCard } from '@/components/ExpiryItemCard';
 import { LastTimeTaskCard } from '@/components/LastTimeTaskCard';
 import { useExpiryStore, getExpiryBuckets } from '@/store/expiryStore';
@@ -19,8 +21,21 @@ function weekdayMonth(): string {
   return `${weekdays[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
 }
 
+const EXPIRING_GROUPS = [
+  { key: 'needsAttention', label: 'Needs attention', tone: 'danger' as const },
+  { key: 'thisWeek', label: 'This week', tone: 'warning' as const },
+  { key: 'fineForNow', label: 'Fine for now', tone: 'success' as const },
+];
+
+const LAST_TIME_GROUPS = [
+  { key: 'overdue', label: 'Overdue', tone: 'danger' as const },
+  { key: 'dueSoon', label: 'Due soon', tone: 'warning' as const },
+  { key: 'onTrack', label: 'On track', tone: 'success' as const },
+];
+
 export default function Home() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [section, setSection] = useState<'expiring' | 'lastTime'>('expiring');
 
   const expiryItems = useExpiryStore((s) => s.items);
@@ -34,10 +49,14 @@ export default function Home() {
   }, [hydrateExpiry, hydrateLastTime]);
 
   const today = new Date(`${todayISODate()}T00:00:00`);
+  const expiryBuckets = getExpiryBuckets(expiryItems);
+  const lastTimeBuckets = getLastTimeBuckets(lastTimeItems);
+  const expiryGroupsWithRows = EXPIRING_GROUPS.filter((g) => expiryBuckets[g.key as keyof typeof expiryBuckets].length > 0);
+  const lastTimeGroupsWithRows = LAST_TIME_GROUPS.filter((g) => lastTimeBuckets[g.key as keyof typeof lastTimeBuckets].length > 0);
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.dateLabel}>{weekdayMonth()}</Text>
@@ -59,17 +78,18 @@ export default function Home() {
 
       {section === 'expiring' ? (
         <FlatList
-          contentContainerStyle={styles.list}
-          data={[
-            { key: 'needsAttention', label: 'Needs attention', tone: 'danger' as const },
-            { key: 'thisWeek', label: 'This week', tone: 'warning' as const },
-            { key: 'fineForNow', label: 'Fine for now', tone: 'success' as const },
-          ]}
+          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 110, flexGrow: 1 }]}
+          data={expiryGroupsWithRows}
           keyExtractor={(g) => g.key}
+          ListEmptyComponent={
+            <EmptyState
+              icon="🥛"
+              title="Nothing expiring yet"
+              subtitle="Add milk, leftovers, or medicine and FreshKeep will watch the dates for you."
+            />
+          }
           renderItem={({ item: group }) => {
-            const buckets = getExpiryBuckets(expiryItems);
-            const rows = buckets[group.key as keyof typeof buckets];
-            if (rows.length === 0) return null;
+            const rows = expiryBuckets[group.key as keyof typeof expiryBuckets];
             return (
               <View>
                 <SectionHeader label={group.label} tone={group.tone} />
@@ -81,7 +101,7 @@ export default function Home() {
                         key={row.id}
                         icon={row.icon}
                         name={row.name}
-                        subtitle={[row.location, row.opened_date ? 'opened' : row.added_date ? 'added' : null].filter(Boolean).join(' · ') || ' '}
+                        subtitle={row.opened_date ? 'opened' : row.added_date ? 'added' : ' '}
                         daysLeft={daysLeft}
                         tone={group.key as 'needsAttention' | 'thisWeek' | 'fineForNow'}
                         onPress={() => router.push({ pathname: '/item/[id]', params: { id: row.id, type: 'expiry' } })}
@@ -95,17 +115,18 @@ export default function Home() {
         />
       ) : (
         <FlatList
-          contentContainerStyle={styles.list}
-          data={[
-            { key: 'overdue', label: 'Overdue', tone: 'danger' as const },
-            { key: 'dueSoon', label: 'Due soon', tone: 'warning' as const },
-            { key: 'onTrack', label: 'On track', tone: 'success' as const },
-          ]}
+          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 110, flexGrow: 1 }]}
+          data={lastTimeGroupsWithRows}
           keyExtractor={(g) => g.key}
+          ListEmptyComponent={
+            <EmptyState
+              icon="🛏️"
+              title="No tasks yet"
+              subtitle={'Track things you do on a schedule — like changing filters or bedsheets — and never wonder when you last did it.'}
+            />
+          }
           renderItem={({ item: group }) => {
-            const buckets = getLastTimeBuckets(lastTimeItems);
-            const rows = buckets[group.key as keyof typeof buckets];
-            if (rows.length === 0) return null;
+            const rows = lastTimeBuckets[group.key as keyof typeof lastTimeBuckets];
             return (
               <View>
                 <SectionHeader label={group.label} tone={group.tone} />
@@ -141,10 +162,10 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.screenBg },
-  header: { paddingTop: 56, paddingHorizontal: spacing.xl, paddingBottom: 10 },
+  header: { paddingHorizontal: spacing.xl, paddingBottom: 10 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   dateLabel: { fontSize: 13, fontWeight: '600', color: colors.primary, letterSpacing: 0.2 },
   title: { fontSize: 30, fontWeight: '800', letterSpacing: -0.8, marginTop: 2, color: colors.textPrimary },
   settingsIcon: { fontSize: 22 },
-  list: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 118 },
+  list: { paddingHorizontal: 16, paddingTop: 8 },
 });

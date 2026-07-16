@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { colors } from '@/theme/tokens';
@@ -16,6 +17,7 @@ const BENEFITS = [
 
 export default function Premium() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const isPremium = useAuthStore((s) => s.isPremium);
   const user = useAuthStore((s) => s.user);
   const refreshPremiumStatus = useAuthStore((s) => s.refreshPremiumStatus);
@@ -61,8 +63,8 @@ export default function Premium() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
-      <Text style={styles.close} onPress={() => router.back()}>✕</Text>
+    <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
+      <Text style={[styles.close, { marginTop: insets.top + 16 }]} onPress={() => router.back()}>✕</Text>
       <View style={styles.heroWrap}>
         <View style={styles.iconWrap}><Text style={{ fontSize: 36 }}>☁️</Text></View>
         <Text style={styles.eyebrow}>FRESHKEEP PREMIUM</Text>
@@ -96,6 +98,7 @@ export default function Premium() {
               style={[styles.planCard, selectedPlan === 'yearly' && styles.planCardHighlight]}
               onPress={() => setSelectedPlan('yearly')}
             >
+              <Text style={styles.saveBadge}>SAVE 37%</Text>
               <Text style={styles.planLabel}>Yearly</Text>
               <Text style={styles.planPrice}>$14.99</Text>
               <Text style={styles.planSub}>$1.25 / month</Text>
@@ -109,14 +112,14 @@ export default function Premium() {
           )}
         </>
       )}
-      <Text style={styles.footnote}>The free plan keeps everything on-device forever.</Text>
+      <Text style={styles.footnote}>Cancel anytime.{'\n'}The free plan keeps everything on-device forever.</Text>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#06110D', paddingHorizontal: 24 },
-  close: { color: 'rgba(255,255,255,0.5)', fontSize: 22, textAlign: 'right', marginTop: 58 },
+  close: { color: 'rgba(255,255,255,0.5)', fontSize: 22, textAlign: 'right' },
   heroWrap: { alignItems: 'center', paddingTop: 14 },
   iconWrap: { width: 72, height: 72, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' },
   eyebrow: { color: '#E8C15A', fontSize: 12, fontWeight: '800', letterSpacing: 2, marginTop: 16 },
@@ -127,6 +130,7 @@ const styles = StyleSheet.create({
   plansRow: { flexDirection: 'row', gap: 10 },
   planCard: { flex: 1, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 15, padding: 14 },
   planCardHighlight: { backgroundColor: 'rgba(47,187,132,0.14)', borderColor: '#2FBB84', borderWidth: 1.5 },
+  saveBadge: { position: 'absolute', top: -9, right: 12, fontSize: 10, fontWeight: '800', backgroundColor: colors.gold, color: colors.goldText, paddingVertical: 3, paddingHorizontal: 7, borderRadius: 6, overflow: 'hidden' },
   planLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 13 },
   planPrice: { color: '#fff', fontSize: 22, fontWeight: '800', marginTop: 4 },
   planSub: { color: 'rgba(255,255,255,0.5)', fontSize: 12 },

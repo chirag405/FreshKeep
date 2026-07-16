@@ -7,10 +7,10 @@ export type NewExpiryItem = {
   name: string;
   icon: string;
   expiryDate: string;
-  location?: string | null;
   openedDate?: string | null;
   reminderEnabled?: boolean;
   reminderDaysBefore?: number;
+  note?: string | null;
 };
 
 export async function listExpiryItems(): Promise<ExpiryItemRow[]> {
@@ -25,16 +25,16 @@ export async function insertExpiryItem(input: NewExpiryItem): Promise<ExpiryItem
     expiry_date: input.expiryDate,
     added_date: todayISODate(),
     opened_date: input.openedDate ?? null,
-    location: input.location ?? null,
     reminder_enabled: input.reminderEnabled ? 1 : 0,
     reminder_days_before: input.reminderDaysBefore ?? 2,
+    note: input.note ?? null,
     updated_at: nowISODateTime(),
   };
   await getDb().runAsync(
     `INSERT INTO expiry_items
-      (id, name, icon, expiry_date, added_date, opened_date, location, reminder_enabled, reminder_days_before, updated_at)
+      (id, name, icon, expiry_date, added_date, opened_date, reminder_enabled, reminder_days_before, note, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [row.id, row.name, row.icon, row.expiry_date, row.added_date, row.opened_date, row.location, row.reminder_enabled, row.reminder_days_before, row.updated_at],
+    [row.id, row.name, row.icon, row.expiry_date, row.added_date, row.opened_date, row.reminder_enabled, row.reminder_days_before, row.note, row.updated_at],
   );
   void pushExpiryItem(row);
   return row;
@@ -46,10 +46,10 @@ export async function updateExpiryItem(id: string, patch: Partial<NewExpiryItem>
   if (patch.name !== undefined) { fields.push('name = ?'); values.push(patch.name); }
   if (patch.icon !== undefined) { fields.push('icon = ?'); values.push(patch.icon); }
   if (patch.expiryDate !== undefined) { fields.push('expiry_date = ?'); values.push(patch.expiryDate); }
-  if (patch.location !== undefined) { fields.push('location = ?'); values.push(patch.location); }
   if (patch.openedDate !== undefined) { fields.push('opened_date = ?'); values.push(patch.openedDate); }
   if (patch.reminderEnabled !== undefined) { fields.push('reminder_enabled = ?'); values.push(patch.reminderEnabled ? 1 : 0); }
   if (patch.reminderDaysBefore !== undefined) { fields.push('reminder_days_before = ?'); values.push(patch.reminderDaysBefore); }
+  if (patch.note !== undefined) { fields.push('note = ?'); values.push(patch.note); }
   if (fields.length === 0) return;
   const updatedAt = nowISODateTime();
   fields.push('updated_at = ?');

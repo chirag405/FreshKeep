@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
 import { colors, radii } from '@/theme/tokens';
@@ -11,6 +12,7 @@ import { emitDateScanned } from '@/lib/ocr/scanResultChannel';
 
 export default function Scan() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [processing, setProcessing] = useState(false);
@@ -62,7 +64,7 @@ export default function Scan() {
   if (candidates) {
     return (
       <View style={styles.screen}>
-        <ScrollView contentContainerStyle={styles.resultsScroll}>
+        <ScrollView contentContainerStyle={[styles.resultsScroll, { paddingTop: insets.top + 30 }]}>
           <Text style={styles.resultTitle}>Which date is it?</Text>
           {candidates.map((c) => (
             <Pressable key={c.iso} style={styles.candidateCard} onPress={() => selectCandidate(c)}>
@@ -71,7 +73,7 @@ export default function Scan() {
             </Pressable>
           ))}
         </ScrollView>
-        <View style={styles.resultsFooter}>
+        <View style={[styles.resultsFooter, { paddingBottom: insets.bottom + 20 }]}>
           <Text style={styles.manualLink} onPress={() => setCandidates(null)}>Retake photo</Text>
           <Text style={styles.manualLink} onPress={() => router.back()}>Enter manually instead</Text>
         </View>
@@ -82,7 +84,7 @@ export default function Scan() {
   return (
     <View style={[styles.screen, styles.cameraScreen]}>
       <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" />
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, { paddingBottom: insets.bottom + 40 }]}>
         <Text style={styles.hint}>Point at the printed expiry date</Text>
         {error && <Text style={styles.errorText}>{error}</Text>}
         <View style={styles.controlsRow}>

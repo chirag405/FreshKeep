@@ -1,15 +1,27 @@
+import '../global.css';
+
 import { Stack } from 'expo-router';
+import { ThemeProvider } from 'expo-router/react-navigation';
+import { useColorScheme } from 'nativewind';
+import { PortalHost } from '@rn-primitives/portal';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { migrate } from '@/db/client';
-import { colors } from '@/theme/tokens';
 import { initNotifications } from '@/notifications';
 import { useAuthStore } from '@/store/authStore';
 import { pullAndMergeAll } from '@/sync';
+import { AnimatedSplash } from '@/components/AnimatedSplash';
+import { hasSeenOnboarding } from '@/lib/onboardingFlag';
+import { NAV_THEME } from '@/lib/theme';
 
 export default function RootLayout() {
+  const { colorScheme } = useColorScheme();
   const [ready, setReady] = useState(false);
+  const [initialRoute, setInitialRoute] = useState<'/onboarding' | '/' | null>(null);
   const initAuth = useAuthStore((s) => s.init);
 
   useEffect(() => {
@@ -29,30 +41,42 @@ export default function RootLayout() {
       } catch (error) {
         console.error('[boot] auth/sync init failed, continuing anyway', error);
       } finally {
+        const seen = await hasSeenOnboarding();
+        setInitialRoute(seen ? '/' : '/onboarding');
         setReady(true);
       }
     }
     boot();
   }, [initAuth]);
 
-  if (!ready) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.screenBg }}>
-        <ActivityIndicator color={colors.primary} />
-      </View>
-    );
-  }
-
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="item/[id]" />
-      <Stack.Screen name="settings" />
-      <Stack.Screen name="add" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="choose-icon" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="scan" options={{ presentation: 'fullScreenModal' }} />
-      <Stack.Screen name="login" options={{ presentation: 'fullScreenModal' }} />
-      <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+          <BottomSheetModalProvider>
+            {!ready ? (
+              <AnimatedSplash />
+            ) : (
+              <Stack screenOptions={{ headerShown: false }} initialRouteName={initialRoute === '/onboarding' ? 'onboarding' : 'index'}>
+                <Stack.Screen name="onboarding" />
+                <Stack.Screen name="index" />
+                <Stack.Screen name="item/[id]" />
+                <Stack.Screen name="settings" />
+                <Stack.Screen name="how-to" />
+                <Stack.Screen
+                  name="add"
+                  options={{ presentation: 'transparentModal', animation: 'none', contentStyle: { backgroundColor: 'transparent' } }}
+                />
+                <Stack.Screen name="scan" options={{ presentation: 'fullScreenModal' }} />
+                <Stack.Screen name="login" options={{ presentation: 'fullScreenModal' }} />
+                <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
+              </Stack>
+            )}
+          </BottomSheetModalProvider>
+          <PortalHost />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
