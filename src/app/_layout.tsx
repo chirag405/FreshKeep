@@ -13,6 +13,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { migrate } from '@/db/client';
 import { initNotifications } from '@/notifications';
 import { useAuthStore } from '@/store/authStore';
+import { useHouseholdStore } from '@/store/householdStore';
 import { pullAndMergeAll } from '@/sync';
 import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { hasSeenOnboarding } from '@/lib/onboardingFlag';
@@ -37,6 +38,9 @@ export default function RootLayout() {
         // unexpected failure (e.g. initAuth's own network call) still can't
         // strand the app on the loading spinner forever.
         await initAuth();
+        // Household membership must be known before the first sync — it
+        // decides whether a free user syncs at all (household rows only).
+        await useHouseholdStore.getState().refresh();
         await pullAndMergeAll();
       } catch (error) {
         console.error('[boot] auth/sync init failed, continuing anyway', error);
@@ -64,8 +68,13 @@ export default function RootLayout() {
                 <Stack.Screen name="item/[id]" />
                 <Stack.Screen name="settings" />
                 <Stack.Screen name="how-to" />
+                <Stack.Screen name="join/[token]" />
                 <Stack.Screen
                   name="add"
+                  options={{ presentation: 'transparentModal', animation: 'none', contentStyle: { backgroundColor: 'transparent' } }}
+                />
+                <Stack.Screen
+                  name="mili"
                   options={{ presentation: 'transparentModal', animation: 'none', contentStyle: { backgroundColor: 'transparent' } }}
                 />
                 <Stack.Screen name="scan" options={{ presentation: 'fullScreenModal' }} />

@@ -6,9 +6,11 @@ import * as LocalAuthentication from 'expo-local-authentication';
 
 import { colors, radii, shadow } from '@/theme/tokens';
 import { BackLink } from '@/components/BackLink';
+import { HouseholdCard } from '@/components/HouseholdCard';
 import { Switch } from '@/components/ui/switch';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useAuthStore } from '@/store/authStore';
+import { useHouseholdStore } from '@/store/householdStore';
 import { pullAndMergeAll } from '@/sync';
 
 export default function Settings() {
@@ -67,7 +69,15 @@ export default function Settings() {
           <Text style={styles.rowSubtitle}>{user ? `Signed in · ${isPremium ? 'Premium' : 'Free plan'}` : 'Sign in to save your list and sync'}</Text>
         </View>
         {user ? (
-          <Text style={styles.signOutLink} onPress={signOut}>Sign out</Text>
+          <Text
+            style={styles.signOutLink}
+            onPress={async () => {
+              await signOut();
+              useHouseholdStore.getState().reset();
+            }}
+          >
+            Sign out
+          </Text>
         ) : (
           <Text style={styles.signOutLink} onPress={() => router.push('/login')}>Sign in</Text>
         )}
@@ -94,6 +104,9 @@ export default function Settings() {
           </Text>
         </View>
       )}
+
+      <Text style={styles.sectionLabel}>HOUSEHOLD</Text>
+      <HouseholdCard />
 
       <Text style={styles.sectionLabel}>REMINDERS</Text>
       <View style={styles.card}>
@@ -129,7 +142,8 @@ export default function Settings() {
         <Text style={styles.rowTitle} onPress={() => router.push('/how-to')}>📖  How FreshKeep works</Text>
       </View>
       <Text style={styles.footnote}>
-        On the free plan everything stays on this device. Premium encrypts a copy to the cloud so you can restore it on any device.
+        On the free plan personal items stay on this device — except items in a shared household, which sync via the cloud so
+        every member sees them. Premium adds encrypted cloud backup for everything.
       </Text>
 
       <Text style={styles.version}>FreshKeep · Version 1.0{'\n'}Remembers your dates, so you don&apos;t have to.</Text>

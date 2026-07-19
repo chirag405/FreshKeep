@@ -16,6 +16,8 @@ import { onDateScanned, clearScanListener } from '@/lib/ocr/scanResultChannel';
 import { useExpiryStore } from '@/store/expiryStore';
 import { useLastTimeStore } from '@/store/lastTimeStore';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useAuthStore } from '@/store/authStore';
+import { useHouseholdStore } from '@/store/householdStore';
 import { scheduleReminder } from '@/notifications';
 
 const ALL_ICONS = ICON_CATEGORIES.flatMap((cat) => cat.icons);
@@ -29,16 +31,18 @@ function addDays(iso: string, days: number): string {
 
 export default function Add() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ type?: string }>();
+  const params = useLocalSearchParams<{ type?: string; name?: string; expiryDate?: string; repeatDays?: string }>();
   const [section, setSection] = useState<'expiry' | 'lastTime'>(params.type === 'lastTime' ? 'lastTime' : 'expiry');
 
-  const [name, setName] = useState('');
+  // `name`/`expiryDate`/`repeatDays` params let Mili (and future flows)
+  // open this sheet pre-filled instead of dead-ending on a weak voice parse.
+  const [name, setName] = useState(params.name ?? '');
   const [icon, setIcon] = useState(section === 'expiry' ? DEFAULT_EXPIRY_ICON : DEFAULT_LAST_TIME_ICON);
   const [iconTouched, setIconTouched] = useState(false);
   const [pickingIcon, setPickingIcon] = useState(false);
   const [iconQuery, setIconQuery] = useState('');
-  const [expiryDate, setExpiryDate] = useState(addDays(todayISODate(), 7));
-  const [repeatDays, setRepeatDays] = useState<number | null>(null);
+  const [expiryDate, setExpiryDate] = useState(params.expiryDate ?? addDays(todayISODate(), 7));
+  const [repeatDays, setRepeatDays] = useState<number | null>(params.repeatDays ? Number(params.repeatDays) : null);
   const [note, setNote] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -47,6 +51,10 @@ export default function Add() {
   const addExpiryItem = useExpiryStore((s) => s.addItem);
   const addTask = useLastTimeStore((s) => s.addTask);
   const defaultReminderDaysBefore = useSettingsStore((s) => s.defaultReminderDaysBefore);
+  const user = useAuthStore((s) => s.user);
+  const household = useHouseholdStore((s) => s.household);
+  const [destination, setDestination] = useState<'household' | 'personal'>('household');
+  const householdId = user && household && destination === 'household' ? household.id : null;
 
   useEffect(() => {
     onDateScanned((iso) => setExpiryDate(iso));
@@ -93,6 +101,7 @@ export default function Add() {
           reminderEnabled,
           reminderDaysBefore: defaultReminderDaysBefore,
           note: trimmedNote || null,
+          householdId,
         });
         if (reminderEnabled) {
           const triggerDate = new Date(`${expiryDate}T09:00:00`);
@@ -120,6 +129,7 @@ export default function Add() {
           repeatIntervalDays: repeatDays,
           reminderEnabled,
           note: trimmedNote || null,
+          householdId,
         });
         if (reminderEnabled && row.repeat_interval_days) {
           const triggerDate = new Date(`${row.last_done_date}T09:00:00`);
@@ -312,6 +322,20 @@ export default function Add() {
               multiline
             />
             <Text style={styles.hint}>Shown back to you when the reminder fires</Text>
+
+            {user && household && (
+              <>
+                <Text style={styles.fieldLabel}>ADD TO</Text>
+                <SegmentedControl
+                  value={destination}
+                  onChange={setDestination}
+                  options={[
+                    { label: `👨‍👩‍👧 ${household.name}`, value: 'household' },
+                    { label: '🔒 Just me', value: 'personal' },
+                  ]}
+                />
+              </>
+            )}
 
             <View style={styles.reminderRow}>
               <View>

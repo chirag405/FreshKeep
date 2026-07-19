@@ -10,6 +10,8 @@ export type ExpiryItemRow = {
   reminder_enabled: number; // 0 | 1
   reminder_days_before: number;
   note: string | null;
+  household_id: string | null; // null = personal item; set = shared household item
+  created_by: string | null; // auth user id of whoever added it (for "added by" bylines)
   updated_at: string; // ISO datetime, used for last-write-wins sync merges
 };
 
@@ -21,6 +23,8 @@ export type LastTimeTaskRow = {
   repeat_interval_days: number | null;
   reminder_enabled: number; // 0 | 1
   note: string | null;
+  household_id: string | null; // null = personal task; set = shared household task
+  created_by: string | null; // auth user id of whoever added it (for "added by" bylines)
   updated_at: string; // ISO datetime, used for last-write-wins sync merges
 };
 
@@ -42,6 +46,8 @@ CREATE TABLE IF NOT EXISTS expiry_items (
   reminder_enabled INTEGER NOT NULL DEFAULT 0,
   reminder_days_before INTEGER NOT NULL DEFAULT 2,
   note TEXT,
+  household_id TEXT,
+  created_by TEXT,
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 CREATE TABLE IF NOT EXISTS last_time_tasks (
@@ -52,6 +58,8 @@ CREATE TABLE IF NOT EXISTS last_time_tasks (
   repeat_interval_days INTEGER,
   reminder_enabled INTEGER NOT NULL DEFAULT 0,
   note TEXT,
+  household_id TEXT,
+  created_by TEXT,
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 CREATE TABLE IF NOT EXISTS app_settings (
@@ -81,6 +89,10 @@ export function migrate(): void {
   database.execSync('INSERT OR IGNORE INTO app_settings (id) VALUES (1);');
   ensureColumn(database, 'last_time_tasks', 'note', 'TEXT');
   ensureColumn(database, 'expiry_items', 'note', 'TEXT');
+  ensureColumn(database, 'expiry_items', 'household_id', 'TEXT');
+  ensureColumn(database, 'expiry_items', 'created_by', 'TEXT');
+  ensureColumn(database, 'last_time_tasks', 'household_id', 'TEXT');
+  ensureColumn(database, 'last_time_tasks', 'created_by', 'TEXT');
 }
 
 /**

@@ -1,23 +1,40 @@
 import { supabase } from '@/lib/supabaseClient';
 import { getDb, type ExpiryItemRow, type LastTimeTaskRow } from '@/db/client';
 import { useAuthStore } from '@/store/authStore';
+import { useHouseholdStore } from '@/store/householdStore';
+
+type SyncScope = {
+  userId: string;
+  /** Premium syncs everything; free household members sync ONLY household rows. */
+  includePersonal: boolean;
+};
 
 /**
- * Cloud sync is a Premium feature: free-tier users' data never leaves the
- * device. Every function here is a no-op unless the user is signed in AND
- * flagged premium (see supabase/README.md for how that flag gets set).
+ * Who syncs what:
+ * - Premium: everything (personal backup + any household items).
+ * - Free + in a shared household: household items only — sharing inherently
+ *   requires the cloud, but personal items still never leave the device on
+ *   the free plan (see docs/features/2026-07-17-... for the product call).
+ * - Free, no household (or signed out): nothing.
  */
-function syncableUserId(): string | null {
+function syncScope(): SyncScope | null {
   const { user, isPremium } = useAuthStore.getState();
-  return user && isPremium ? user.id : null;
+  if (!user) return null;
+  if (isPremium) return { userId: user.id, includePersonal: true };
+  if (useHouseholdStore.getState().household) return { userId: user.id, includePersonal: false };
+  return null;
+}
+
+function rowInScope(scope: SyncScope, householdId: string | null): boolean {
+  return scope.includePersonal || householdId !== null;
 }
 
 export async function pushExpiryItem(row: ExpiryItemRow): Promise<void> {
-  const userId = syncableUserId();
-  if (!userId) return;
+  const scope = syncScope();
+  if (!scope || !rowInScope(scope, row.household_id)) return;
   const { error } = await supabase.from('expiry_items').upsert({
     id: row.id,
-    user_id: userId,
+    user_id: row.created_by ?? scope.userId,
     name: row.name,
     icon: row.icon,
     expiry_date: row.expiry_date,
@@ -26,39 +43,45 @@ export async function pushExpiryItem(row: ExpiryItemRow): Promise<void> {
     reminder_enabled: Boolean(row.reminder_enabled),
     reminder_days_before: row.reminder_days_before,
     note: row.note,
+    household_id: row.household_id,
+    created_by: row.created_by,
     updated_at: row.updated_at,
   });
   if (error) console.error('[sync] failed to push expiry item', row.id, error.message);
 }
 
 export async function pushExpiryItemDelete(id: string): Promise<void> {
-  const userId = syncableUserId();
-  if (!userId) return;
-  const { error } = await supabase.from('expiry_items').delete().eq('id', id).eq('user_id', userId);
+  const scope = syncScope();
+  if (!scope) return;
+  // No user_id filter: RLS already restricts deletes to rows we can touch,
+  // and household items may have been created by another member.
+  const { error } = await supabase.from('expiry_items').delete().eq('id', id);
   if (error) console.error('[sync] failed to push expiry item delete', id, error.message);
 }
 
 export async function pushLastTimeTask(row: LastTimeTaskRow): Promise<void> {
-  const userId = syncableUserId();
-  if (!userId) return;
+  const scope = syncScope();
+  if (!scope || !rowInScope(scope, row.household_id)) return;
   const { error } = await supabase.from('last_time_tasks').upsert({
     id: row.id,
-    user_id: userId,
+    user_id: row.created_by ?? scope.userId,
     name: row.name,
     icon: row.icon,
     last_done_date: row.last_done_date,
     repeat_interval_days: row.repeat_interval_days,
     reminder_enabled: Boolean(row.reminder_enabled),
     note: row.note,
+    household_id: row.household_id,
+    created_by: row.created_by,
     updated_at: row.updated_at,
   });
   if (error) console.error('[sync] failed to push last-time task', row.id, error.message);
 }
 
 export async function pushLastTimeTaskDelete(id: string): Promise<void> {
-  const userId = syncableUserId();
-  if (!userId) return;
-  const { error } = await supabase.from('last_time_tasks').delete().eq('id', id).eq('user_id', userId);
+  const scope = syncScope();
+  if (!scope) return;
+  const { error } = await supabase.from('last_time_tasks').delete().eq('id', id);
   if (error) console.error('[sync] failed to push last-time task delete', id, error.message);
 }
 
@@ -69,12 +92,13 @@ async function mergeRemoteExpiryItem(db: ReturnType<typeof getDb>, r: RemoteExpi
   const local = await db.getFirstAsync<ExpiryItemRow>('SELECT * FROM expiry_items WHERE id = ?', [r.id]);
   if (!local || new Date(r.updated_at) > new Date(local.updated_at)) {
     await db.runAsync(
-      `INSERT INTO expiry_items (id, name, icon, expiry_date, added_date, opened_date, reminder_enabled, reminder_days_before, note, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO expiry_items (id, name, icon, expiry_date, added_date, opened_date, reminder_enabled, reminder_days_before, note, household_id, created_by, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon, expiry_date=excluded.expiry_date,
          added_date=excluded.added_date, opened_date=excluded.opened_date,
-         reminder_enabled=excluded.reminder_enabled, reminder_days_before=excluded.reminder_days_before, note=excluded.note, updated_at=excluded.updated_at`,
-      [r.id, r.name, r.icon, r.expiry_date, r.added_date, r.opened_date, r.reminder_enabled ? 1 : 0, r.reminder_days_before, r.note, r.updated_at],
+         reminder_enabled=excluded.reminder_enabled, reminder_days_before=excluded.reminder_days_before, note=excluded.note,
+         household_id=excluded.household_id, created_by=excluded.created_by, updated_at=excluded.updated_at`,
+      [r.id, r.name, r.icon, r.expiry_date, r.added_date, r.opened_date, r.reminder_enabled ? 1 : 0, r.reminder_days_before, r.note, r.household_id, r.created_by, r.updated_at],
     );
   }
 }
@@ -83,11 +107,12 @@ async function mergeRemoteLastTimeTask(db: ReturnType<typeof getDb>, r: RemoteTa
   const local = await db.getFirstAsync<LastTimeTaskRow>('SELECT * FROM last_time_tasks WHERE id = ?', [r.id]);
   if (!local || new Date(r.updated_at) > new Date(local.updated_at)) {
     await db.runAsync(
-      `INSERT INTO last_time_tasks (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, note, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO last_time_tasks (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, note, household_id, created_by, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon, last_done_date=excluded.last_done_date,
-         repeat_interval_days=excluded.repeat_interval_days, reminder_enabled=excluded.reminder_enabled, note=excluded.note, updated_at=excluded.updated_at`,
-      [r.id, r.name, r.icon, r.last_done_date, r.repeat_interval_days, r.reminder_enabled ? 1 : 0, r.note, r.updated_at],
+         repeat_interval_days=excluded.repeat_interval_days, reminder_enabled=excluded.reminder_enabled, note=excluded.note,
+         household_id=excluded.household_id, created_by=excluded.created_by, updated_at=excluded.updated_at`,
+      [r.id, r.name, r.icon, r.last_done_date, r.repeat_interval_days, r.reminder_enabled ? 1 : 0, r.note, r.household_id, r.created_by, r.updated_at],
     );
   }
 }
@@ -111,16 +136,26 @@ async function mergeRemoteLastTimeTask(db: ReturnType<typeof getDb>, r: RemoteTa
  * spec's "keep it simple" rule; revisit if it becomes a real complaint.
  */
 export async function pullAndMergeAll(): Promise<void> {
-  const userId = syncableUserId();
-  if (!userId) return;
+  const scope = syncScope();
+  if (!scope) return;
   const db = getDb();
+
+  // RLS already scopes the select to "my personal rows + my household's
+  // rows"; free (non-premium) members additionally narrow to household rows
+  // so their personal items never round-trip through the cloud.
+  const itemsQuery = supabase.from('expiry_items').select('*');
+  const tasksQuery = supabase.from('last_time_tasks').select('*');
+  if (!scope.includePersonal) {
+    itemsQuery.not('household_id', 'is', null);
+    tasksQuery.not('household_id', 'is', null);
+  }
 
   let remoteItemList: RemoteExpiryRow[] = [];
   let remoteTaskList: RemoteTaskRow[] = [];
   try {
     const [{ data: remoteItems, error: itemsError }, { data: remoteTasks, error: tasksError }] = await Promise.all([
-      supabase.from('expiry_items').select('*').eq('user_id', userId),
-      supabase.from('last_time_tasks').select('*').eq('user_id', userId),
+      itemsQuery,
+      tasksQuery,
     ]);
     if (itemsError) console.error('[sync] failed to fetch remote expiry items', itemsError.message);
     if (tasksError) console.error('[sync] failed to fetch remote last-time tasks', tasksError.message);
@@ -151,6 +186,7 @@ export async function pullAndMergeAll(): Promise<void> {
   try {
     const localItems = await db.getAllAsync<ExpiryItemRow>('SELECT * FROM expiry_items');
     for (const local of localItems) {
+      if (!rowInScope(scope, local.household_id)) continue;
       const remote = remoteItemIds.get(local.id);
       if (!remote || new Date(local.updated_at) > new Date(remote.updated_at)) {
         await pushExpiryItem(local);
@@ -164,6 +200,7 @@ export async function pullAndMergeAll(): Promise<void> {
   try {
     const localTasks = await db.getAllAsync<LastTimeTaskRow>('SELECT * FROM last_time_tasks');
     for (const local of localTasks) {
+      if (!rowInScope(scope, local.household_id)) continue;
       const remote = remoteTaskIds.get(local.id);
       if (!remote || new Date(local.updated_at) > new Date(remote.updated_at)) {
         await pushLastTimeTask(local);

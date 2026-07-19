@@ -2,6 +2,7 @@ import { getDb, type LastTimeTaskRow } from '@/db/client';
 import { generateId } from '@/lib/id';
 import { todayISODate, nowISODateTime } from '@/lib/dateMath';
 import { pushLastTimeTask, pushLastTimeTaskDelete } from '@/sync';
+import { useAuthStore } from '@/store/authStore';
 
 export type NewLastTimeTask = {
   name: string;
@@ -10,6 +11,7 @@ export type NewLastTimeTask = {
   repeatIntervalDays?: number | null;
   reminderEnabled?: boolean;
   note?: string | null;
+  householdId?: string | null;
 };
 
 export async function listLastTimeTasks(): Promise<LastTimeTaskRow[]> {
@@ -25,13 +27,15 @@ export async function insertLastTimeTask(input: NewLastTimeTask): Promise<LastTi
     repeat_interval_days: input.repeatIntervalDays ?? null,
     reminder_enabled: input.reminderEnabled ? 1 : 0,
     note: input.note ?? null,
+    household_id: input.householdId ?? null,
+    created_by: useAuthStore.getState().user?.id ?? null,
     updated_at: nowISODateTime(),
   };
   await getDb().runAsync(
     `INSERT INTO last_time_tasks
-      (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, note, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [row.id, row.name, row.icon, row.last_done_date, row.repeat_interval_days, row.reminder_enabled, row.note, row.updated_at],
+      (id, name, icon, last_done_date, repeat_interval_days, reminder_enabled, note, household_id, created_by, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [row.id, row.name, row.icon, row.last_done_date, row.repeat_interval_days, row.reminder_enabled, row.note, row.household_id, row.created_by, row.updated_at],
   );
   void pushLastTimeTask(row);
   return row;
@@ -46,6 +50,7 @@ export async function updateLastTimeTask(id: string, patch: Partial<NewLastTimeT
   if (patch.repeatIntervalDays !== undefined) { fields.push('repeat_interval_days = ?'); values.push(patch.repeatIntervalDays); }
   if (patch.reminderEnabled !== undefined) { fields.push('reminder_enabled = ?'); values.push(patch.reminderEnabled ? 1 : 0); }
   if (patch.note !== undefined) { fields.push('note = ?'); values.push(patch.note); }
+  if (patch.householdId !== undefined) { fields.push('household_id = ?'); values.push(patch.householdId); }
   if (fields.length === 0) return;
   const updatedAt = nowISODateTime();
   fields.push('updated_at = ?');

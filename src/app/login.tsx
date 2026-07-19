@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/theme/tokens';
 import { useAuthStore } from '@/store/authStore';
+import { useHouseholdStore } from '@/store/householdStore';
+import { pullAndMergeAll } from '@/sync';
 
 export default function Login() {
   const router = useRouter();
@@ -14,11 +16,16 @@ export default function Login() {
   const onGoogle = async () => {
     setSigningInGoogle(true);
     const { error } = await signInWithGoogle();
-    setSigningInGoogle(false);
     if (error) {
+      setSigningInGoogle(false);
       Alert.alert('Google sign-in failed', error);
       return;
     }
+    // Load household membership before the first sync so a free member's
+    // shared items come down immediately (see syncScope in src/sync).
+    await useHouseholdStore.getState().refresh();
+    await pullAndMergeAll();
+    setSigningInGoogle(false);
     router.replace('/');
   };
 

@@ -21,7 +21,7 @@ Copy `.env.example` to `.env.local` in the project root and fill in the two
 values from step 1 (the LemonSqueezy variables are filled in during the
 billing setup further down):
 
-```
+```text
 EXPO_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
 ```
@@ -41,6 +41,16 @@ Open the SQL Editor in your Supabase project dashboard and run, in order:
    `note` column to `last_time_tasks`.
 4. `supabase/migrations/0004_expiry_item_notes.sql` — adds an optional
    `note` column to `expiry_items`.
+5. `supabase/migrations/0005_households.sql` — shared households
+   (Splitwise-style): tables, RLS, invite/redeem RPCs with server-enforced
+   member caps (3 free / 10 Premium), and realtime publication for live
+   multiplayer. Also adds `profiles.display_name`.
+6. `supabase/migrations/0006_mili_usage.sql` — usage log the Mili voice
+   agent's rate limiter counts against.
+
+If the realtime blocks at the end of 0005 error in the SQL editor, enable
+realtime for `expiry_items` and `last_time_tasks` from Database →
+Replication in the dashboard instead.
 
 ## 4. Enable Google sign-in
 
@@ -104,5 +114,30 @@ quick UI testing):
 update public.profiles set is_premium = true where user_id = '<your-user-id>';
 ```
 
-Once all of the above is done, sign-in, sync, and billing all work exactly
-as the app code expects — nothing else needs to change.
+## 6. Set up the Mili voice agent (Premium feature)
+
+Mili turns "add eggs with 6 days of expiry" into a saved item. Speech-to-text
+runs on the phone; only the transcript reaches the `mili-parse` Edge Function,
+which uses LangChain/LangGraph with Claude to produce a typed intent.
+
+1. Deploy the function (JWT verification stays ON — only signed-in users may
+   call it, and the function additionally checks `is_premium` + rate limits):
+
+   ```bash
+   supabase functions deploy mili-parse
+   ```
+
+2. Set the Anthropic API key (server-only — never in `.env.local`):
+
+   ```bash
+   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+   # optional — defaults to claude-haiku-4-5:
+   supabase secrets set MILI_MODEL=claude-haiku-4-5
+   ```
+
+Households need no extra setup beyond migration 0005 — invites are
+`freshkeep://join/<token>` deep links shared through the OS share sheet, so
+there's nothing to configure and no SMS cost.
+
+Once all of the above is done, sign-in, sync, billing, households, and Mili
+all work exactly as the app code expects — nothing else needs to change.

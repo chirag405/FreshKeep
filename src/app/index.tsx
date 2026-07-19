@@ -12,6 +12,8 @@ import { ExpiryItemCard } from '@/components/ExpiryItemCard';
 import { LastTimeTaskCard } from '@/components/LastTimeTaskCard';
 import { useExpiryStore, getExpiryBuckets } from '@/store/expiryStore';
 import { useLastTimeStore, getLastTimeBuckets } from '@/store/lastTimeStore';
+import { useAuthStore } from '@/store/authStore';
+import { useHouseholdStore } from '@/store/householdStore';
 import { daysBetween, todayISODate } from '@/lib/dateMath';
 
 function weekdayMonth(): string {
@@ -51,6 +53,16 @@ export default function Home() {
   const today = new Date(`${todayISODate()}T00:00:00`);
   const expiryBuckets = getExpiryBuckets(expiryItems);
   const lastTimeBuckets = getLastTimeBuckets(lastTimeItems);
+
+  const myUserId = useAuthStore((s) => s.user?.id ?? null);
+  const isPremium = useAuthStore((s) => s.isPremium);
+  const memberName = useHouseholdStore((s) => s.memberName);
+  // "added by X" byline for shared items someone else added.
+  const byline = (householdId: string | null, createdBy: string | null): string | null => {
+    if (!householdId || !createdBy || createdBy === myUserId) return null;
+    const who = memberName(createdBy);
+    return who ? `added by ${who.split(' ')[0]}` : null;
+  };
   const expiryGroupsWithRows = EXPIRING_GROUPS.filter((g) => expiryBuckets[g.key as keyof typeof expiryBuckets].length > 0);
   const lastTimeGroupsWithRows = LAST_TIME_GROUPS.filter((g) => lastTimeBuckets[g.key as keyof typeof lastTimeBuckets].length > 0);
 
@@ -62,7 +74,20 @@ export default function Home() {
             <Text style={styles.dateLabel}>{weekdayMonth()}</Text>
             <Text style={styles.title}>FreshKeep</Text>
           </View>
-          <Text style={styles.settingsIcon} onPress={() => router.push('/settings')}>⚙️</Text>
+          <View style={styles.headerActions}>
+            <Text
+              style={styles.settingsIcon}
+              onPress={() => {
+                // Mili is Premium-only; the Edge Function enforces it too.
+                if (!myUserId) router.push('/login');
+                else if (!isPremium) router.push('/premium');
+                else router.push('/mili');
+              }}
+            >
+              🎤
+            </Text>
+            <Text style={styles.settingsIcon} onPress={() => router.push('/settings')}>⚙️</Text>
+          </View>
         </View>
         <View style={{ marginTop: 16 }}>
           <SegmentedControl
@@ -101,7 +126,7 @@ export default function Home() {
                         key={row.id}
                         icon={row.icon}
                         name={row.name}
-                        subtitle={row.opened_date ? 'opened' : row.added_date ? 'added' : ' '}
+                        subtitle={byline(row.household_id, row.created_by) ?? (row.opened_date ? 'opened' : row.added_date ? 'added' : ' ')}
                         daysLeft={daysLeft}
                         tone={group.key as 'needsAttention' | 'thisWeek' | 'fineForNow'}
                         onPress={() => router.push({ pathname: '/item/[id]', params: { id: row.id, type: 'expiry' } })}
@@ -166,6 +191,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   dateLabel: { fontSize: 13, fontWeight: '600', color: colors.primary, letterSpacing: 0.2 },
   title: { fontSize: 30, fontWeight: '800', letterSpacing: -0.8, marginTop: 2, color: colors.textPrimary },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   settingsIcon: { fontSize: 22 },
   list: { paddingHorizontal: 16, paddingTop: 8 },
 });

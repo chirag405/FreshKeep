@@ -50,7 +50,15 @@
         {
           "cameraPermission": "FreshKeep uses the camera to scan printed expiry dates."
         }
-      ]
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "FreshKeep uses the microphone so you can add items by voice with Mili.",
+          "speechRecognitionPermission": "FreshKeep transcribes your voice on-device to add items with Mili."
+        }
+      ],
+      "expo-speech-recognition"
     ],
     "experiments": {
       "typedRoutes": true,
